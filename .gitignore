@@ -1,0 +1,23 @@
+# Compiled class file
+**/bin/
+**/obj/
+
+# Log file
+*.log
+
+# Package Files #
+packages/
+
+# App config
+*.config
+
+#Folders
+Assets/
+Workspace/
+
+#Vs Code Files
+.vs/
+
+#Backup files
+*.bak
+
