@@ -49,7 +49,7 @@ namespace DiscordPokemonNameBot
             IServiceCollection collection = new ServiceCollection();
             collection.AddSingleton(config)
                 .AddSingleton<PublicApi>()
-                .AddSingleton<DiscordSocketClient>()
+                .AddSingleton<DiscordShardedClient>()
                 .AddSingleton<InteractionService>()
                 .AddSingleton<CommandService>()
                 .AddSingleton<SlashCommandHandler>()
@@ -79,7 +79,7 @@ namespace DiscordPokemonNameBot
 
         private async Task StartDiscordBot()
         {
-            DiscordSocketClient client = _serviceProvider.GetRequiredService<DiscordSocketClient>();
+            DiscordShardedClient client = _serviceProvider.GetRequiredService<DiscordShardedClient>();
 
             InteractionService slashCommand = _serviceProvider.GetRequiredService<InteractionService>();
             await _serviceProvider.GetRequiredService<SlashCommandHandler>().InitializeAsync();
@@ -91,17 +91,15 @@ namespace DiscordPokemonNameBot
             slashCommand.Log += CreateSlashCommandLogging;
             prefixCommand.Log += CreatePrefixCommandLogging;
 
-            client.Ready += async () =>
+            client.ShardReady += async (x) =>
             {
-#if DEBUG
                 var didParse = UInt64.TryParse(ConfigurationManager.AppSettings["GuildId"], out ulong guildId);
                 if (didParse)
                 {
-                    await slashCommand.RegisterCommandsToGuildAsync(guildId);
+                    await slashCommand.RegisterCommandsGloballyAsync(true);
+                    //await slashCommand.RegisterCommandsToGuildAsync(guildId);
                 }
-#else
-                await slashCommand.RegisterCommandsGloballyAsync(true);
-#endif
+                
                 Console.WriteLine("Bot online and Ready!");
             };
 
@@ -121,6 +119,12 @@ namespace DiscordPokemonNameBot
         private async Task CreateSlashCommandLogging(LogMessage arg)
         {
             Console.WriteLine("Slash Command logging");
+
+            if(arg.Exception is InvalidOperationException)
+            {
+                InvalidOperationException exception = (InvalidOperationException)arg.Exception;
+            }
+
             LogMessageModel logMessage = CreateLogMessageModel(arg.Source, arg.Message, arg.Exception.StackTrace, arg.Exception.GetType().Name);
             ConsoleHelper.PrintLogMessage(logMessage);
         }

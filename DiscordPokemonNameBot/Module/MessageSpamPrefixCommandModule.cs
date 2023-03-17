@@ -10,7 +10,7 @@ using System.Text;
 
 namespace DiscordPokemonNameBot.Module
 {
-    public class MessageSpamPrefixCommandModule : ModuleBase<SocketCommandContext>
+    public class MessageSpamPrefixCommandModule : ModuleBase<ShardedCommandContext>
     {
         private readonly PublicApi _api;
         private readonly Random _random;

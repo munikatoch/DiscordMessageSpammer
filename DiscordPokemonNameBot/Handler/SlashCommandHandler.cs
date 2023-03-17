@@ -6,11 +6,11 @@ namespace DiscordPokemonNameBot.Handler
 {
     public class SlashCommandHandler
     {
-        private readonly DiscordSocketClient _client;
+        private readonly DiscordShardedClient _client;
         private readonly InteractionService _command;
         private readonly IServiceProvider _service;
 
-        public SlashCommandHandler(DiscordSocketClient client, InteractionService command, IServiceProvider service)
+        public SlashCommandHandler(DiscordShardedClient client, InteractionService command, IServiceProvider service)
         {
             _client = client;
             _command = command;
@@ -27,7 +27,7 @@ namespace DiscordPokemonNameBot.Handler
         {
             try
             {
-                SocketInteractionContext context = new SocketInteractionContext(_client, arg);
+                ShardedInteractionContext context = new ShardedInteractionContext(_client, arg);
                 await _command.ExecuteCommandAsync(context, _service);
             }
             catch (Exception ex)

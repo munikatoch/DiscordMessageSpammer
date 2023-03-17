@@ -10,7 +10,7 @@ using Microsoft.Extensions.ML;
 
 namespace DiscordPokemonNameBot.Module
 {
-    public class MessageSpamSlashCommandModule : InteractionModuleBase<SocketInteractionContext>
+    public class MessageSpamSlashCommandModule : InteractionModuleBase<ShardedInteractionContext>
     {
         private PublicApi _api;
         private Random _random;

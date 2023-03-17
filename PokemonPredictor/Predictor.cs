@@ -159,8 +159,23 @@ namespace PokemonPredictor
                     {
                         pokemonType = 2;
                     }
+                    else if (label != null && label.StartsWith("Shadow"))
+                    {
+                        pokemonType = 3;
+                    }
                 }
-                label = string.Concat(label, ";", pokemonType);
+                if(label != null) 
+                {
+                    if (label.Equals("Mime Jr", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        label = "Mime Jr.";
+                    }
+                    else if (label.Equals("Type Null", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        label = "Type: Null";
+                    }
+                }
+                label = string.Concat(label, "|", pokemonType);
                 yield return new ImageData()
                 {
                     ImagePath = file,

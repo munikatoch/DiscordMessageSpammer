@@ -14,7 +14,7 @@ namespace DiscordPokemonNameBot.Handler
 {
     public class PrefixHandler
     {
-        private readonly DiscordSocketClient _client;
+        private readonly DiscordShardedClient _client;
         private readonly CommandService _command;
         private readonly IServiceProvider _service;
         private readonly Predictor _predictor;
@@ -23,7 +23,7 @@ namespace DiscordPokemonNameBot.Handler
         private readonly SpamMessage _spamMessage;
 
         public PrefixHandler(
-            DiscordSocketClient client, 
+            DiscordShardedClient client, 
             CommandService command, 
             IServiceProvider service, 
             Predictor predictor, 
@@ -99,7 +99,7 @@ namespace DiscordPokemonNameBot.Handler
             int argPos = 0;
             if (message.HasMentionPrefix(_client.CurrentUser, ref argPos))
             {
-                var context = new SocketCommandContext(_client, message);
+                var context = new ShardedCommandContext(_client, message);
                 await _command.ExecuteAsync(context: context, argPos: argPos, services: _service);
             }
         }
