@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordPokemonNameBot.Model
+namespace Interfaces.Discord
 {
-    public class DiscordMessageRequest
+    public interface IDiscordBot
     {
-        public string Content { get; set; }
+        Task ConnectAndStartBot();
     }
 }

@@ -4,13 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordPokemonNameBot.Model
+namespace Models.Discord.Common
 {
-    public class SpamMessage
+    public class MessageSpam
     {
-        public string Message { get; set; }
+        public string? Message { get; set; }
         public bool IsSpamMessageEnabled { get; set; }
         public bool IsGenerateRandomDurationEnabled { get; set; }
-        public TimeSpan DurationInSeconds  { get; set; }
+        public TimeSpan DurationInSeconds { get; set; }
     }
 }

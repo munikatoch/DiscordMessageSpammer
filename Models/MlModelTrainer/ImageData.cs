@@ -1,16 +1,15 @@
-﻿using Microsoft.ML.Data;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PokemonPredictor.Models
+namespace Models.MlModelTrainer
 {
     public class ImageData
     {
-        public string ImagePath;
+        public string ImagePath { get; set; }
 
-        public string Label;
+        public string Label { get; set; }
     }
 }

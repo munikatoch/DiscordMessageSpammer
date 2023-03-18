@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PokemonPredictor.Common
+namespace Common
 {
     public class FileUtils
     {
@@ -17,6 +16,14 @@ namespace PokemonPredictor.Common
                 {
                     Directory.CreateDirectory(directory);
                 }
+            }
+        }
+
+        public static void CreateDirectoryIfNotExists(string directory)
+        {
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
             }
         }
 
@@ -33,11 +40,6 @@ namespace PokemonPredictor.Common
                 files = Directory.GetFiles(folder, "*", searchOption: SearchOption.AllDirectories);
             }
             return files;
-        }
-
-        public static async Task WriteToFile(string fileName, string content)
-        {
-            await File.AppendAllTextAsync(fileName, content);
         }
 
         public static void DeleteAllFiles(string folder)

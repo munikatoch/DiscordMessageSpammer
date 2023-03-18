@@ -4,12 +4,14 @@
 
 # Log file
 *.log
+log/
 
 # Package Files #
 packages/
 
 # App config
 *.config
+*.json
 
 #Folders
 Assets/

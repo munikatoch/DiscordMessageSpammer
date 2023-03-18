@@ -1,11 +1,5 @@
 ﻿using Microsoft.ML;
 using Microsoft.ML.Data;
-using PokemonPredictor.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PokemonPredictor.Common
 {
@@ -47,22 +41,6 @@ namespace PokemonPredictor.Common
                 }
                 Console.WriteLine();
             }
-        }
-
-        public static void PrintLogMessage(LogMessageModel logMessage)
-        {
-            Console.WriteLine($"Log source: {logMessage.Source}");
-            Console.WriteLine($"Log message: {logMessage.Message}");
-
-            if (!string.IsNullOrEmpty(logMessage.ExceptionType))
-                Console.WriteLine($"Log excpetion type: {logMessage.ExceptionType}");
-
-            if(!string.IsNullOrEmpty(logMessage.ResponseContent))
-                Console.WriteLine($"Log reposne if any: {logMessage.ResponseContent}");
-
-            if (!string.IsNullOrEmpty(logMessage.StackTrace))
-                Console.WriteLine($"Log stacktrace: {logMessage.StackTrace}");
-            Console.WriteLine();
         }
     }
 }

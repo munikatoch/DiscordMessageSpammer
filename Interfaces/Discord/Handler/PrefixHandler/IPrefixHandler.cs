@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordPokemonNameBot.Model
+namespace Interfaces.Discord.Handler.PrefixHandler
 {
-    public enum SpamMessageType
+    public interface IPrefixHandler
     {
-        Beer,
-        Paragraph,
-        Default
+        Task InitializeAsync();
     }
 }

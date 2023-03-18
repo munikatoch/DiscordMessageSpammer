@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DiscordPokemonNameBot.Model
+namespace Models.Discord.Common
 {
     public enum HttpClientType
     {
         Pokemon,
-        RandomBeer,
+        RandomQuote,
+        RandomJoke,
         RandomParagraph,
         Discord
     }

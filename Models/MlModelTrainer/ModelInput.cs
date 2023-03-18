@@ -1,16 +1,15 @@
-﻿using Microsoft.ML.Data;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PokemonPredictor.Models
+namespace Models.MlModelTrainer
 {
     public class ModelInput
     {
-        public byte[] Image;
+        public byte[] Image { get; set; }
 
-        public UInt32 LabelAsKey;
+        public UInt32 LabelAsKey { get; set; }
     }
 }

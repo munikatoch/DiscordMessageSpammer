@@ -1,88 +1,99 @@
 ﻿using Discord;
 using Discord.Interactions;
-using DiscordPokemonNameBot.Helper;
-using DiscordPokemonNameBot.Model;
-using Microsoft.ML;
-using PokemonPredictor.Models;
-using PokemonPredictor;
-using System.Text;
-using Microsoft.Extensions.ML;
+using Interfaces.Discord.Service;
+using Interfaces.Logger;
+using Models.Discord.Common;
+using Discord.WebSocket;
 
 namespace DiscordPokemonNameBot.Module
 {
     public class MessageSpamSlashCommandModule : InteractionModuleBase<ShardedInteractionContext>
     {
-        private PublicApi _api;
-        private Random _random;
-        private SpamMessage _message;
-        private readonly PredictionEnginePool<ModelInput, ModelOutput> _predictionEngine;
-        private readonly HttpHelper _httpHelper;
-        private readonly Predictor _predictor;
+        private readonly Random _random;
+        private readonly IAppLogger _logger;
+        private readonly MessageSpam _message;
+        private readonly IDiscordService _discordService;
+        private readonly IPokemonService _pokemonService;
 
-        public MessageSpamSlashCommandModule(
-            PublicApi api, 
-            Random random, 
-            SpamMessage message,
-            PredictionEnginePool<ModelInput, ModelOutput> predictionEngine,
-            HttpHelper httpHelper,
-            Predictor predictor
-            )
+        public MessageSpamSlashCommandModule(Random random, IAppLogger appLogger, MessageSpam message, IDiscordService discordService, IPokemonService pokemonService)
         {
-            _api = api;
             _random = random;
+            _logger = appLogger;
             _message = message;
-            _predictionEngine = predictionEngine;
-            _httpHelper = httpHelper;
-            _predictor = predictor;
+            _discordService = discordService;
+            _pokemonService = pokemonService;
         }
 
         [SlashCommand("hello", "Basic bot ping like Hello World")]
+        [RequireBotPermission(ChannelPermission.SendMessages)]
         public async Task Ping()
         {
-            await RespondAsync("Hello " + this.Context.User.Mention + ". I am a bot!");
+            await RespondAsync("Hello " + Context.User.Mention + ". I am a bot!");
+            _logger.CommandUsedLog("hello", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
         }
 
         [SlashCommand("delete", "Delete specified number of messages")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
-        public async Task DeleteMessages([Summary(description: "Downloads and removes n messages from the current channel with max 100.")] int count)
+        public async Task DeleteMessages([Summary(description: "Downloads and removes n messages from the current channel with max 99.")] int count)
         {
+            _logger.CommandUsedLog("delete", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
+
             if (count < 0)
             {
                 await RespondAsync("How can I delete negative number of messages. Please teach me sensei");
+                return;
             }
             else if (count == 0)
             {
                 await RespondAsync("Wow! We actually successfully deleted 0 message");
+                return;
+            }
+            else if (count > 99)
+            {
+                await RespondAsync("Deleting top 99 messages as max is 99 only for this command. If you want to delete all message then try deleteall");
             }
             else
             {
                 await RespondAsync("Message getting deleted");
-                await DeleteNMessage(count);
             }
+            _ = Task.Run(async () =>
+            {
+                if (Context?.Channel != null && Context.Channel is ITextChannel textChannel)
+                {
+                    await _discordService.DeleteMessage(textChannel, count);
+                }
+            });
         }
 
         [SlashCommand("startspam", "Start Message Spamming")]
         [RequireBotPermission(ChannelPermission.SendMessages)]
         public async Task StartMessageSpam(
-            [Summary(description: "Duration in seconds after which message will spam minimum is 5s")] int duration = 0,
-            [Summary(description: "Random Message Type")] SpamMessageType type = SpamMessageType.Default,
-            [Summary(description: "Random Message count")] UInt16 count = 1
+            [Summary(description: "Channel for message spamming")] SocketChannel channel,
+            [Summary(description: "Duration in seconds after which message should spam minimum is 5s")] int duration = 0
             )
         {
+            _logger.CommandUsedLog("startspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
+            
             if (duration < 0)
             {
-                await RespondAsync("What is this sorcery? You have to teach me sensie how to use negative durations");
+                await RespondAsync("What is this sorcery? You have to teach me sensie how to use negative duration");
                 return;
             }
-            if (duration != 0 && duration < 5)
+            else if(duration < 5)
             {
+                await RespondAsync("Message will spam at 5s per message as this is the minimum");
                 duration = 5;
             }
+            else
+            {
+                await RespondAsync("Message spam start");
+            }
+            _message.IsGenerateRandomDurationEnabled = duration == 0;
+            _message.DurationInSeconds = TimeSpan.FromSeconds(duration);
             _message.IsGenerateRandomDurationEnabled = duration == 0;
             _message.DurationInSeconds = TimeSpan.FromSeconds(duration);
             if (!_message.IsSpamMessageEnabled)
             {
-                await RespondAsync("Message spam start");
                 _message.IsSpamMessageEnabled = true;
                 _ = Task.Run(async () =>
                 {
@@ -94,7 +105,7 @@ namespace DiscordPokemonNameBot.Module
                             _message.DurationInSeconds = TimeSpan.FromSeconds(duration);
                         }
                         await Task.Delay(_message.DurationInSeconds);
-                        await MessageSpammer(type, count);
+                        await _discordService.CreateAndSendSpamMessage(channel.Id);
                     }
                 });
             }
@@ -109,20 +120,25 @@ namespace DiscordPokemonNameBot.Module
         {
             _message.IsSpamMessageEnabled = false;
             await RespondAsync("Message spam stopped");
+            _logger.CommandUsedLog("stopspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
         }
 
         [SlashCommand("deleteall", "Delete all messages from the channel")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task DeleteAllMessagesFromChannel()
         {
+            _logger.CommandUsedLog("deleteall", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
+
             await RespondAsync("Message getting deleted");
             _ = Task.Run(async () =>
             {
-                IEnumerable<IMessage> messages = await this.Context.Channel.GetMessagesAsync(100).FlattenAsync();
-                while (messages.Count() > 0 && this.Context?.Channel != null)
+                if (Context?.Channel != null && Context.Channel is ITextChannel textChannel)
                 {
-                    await (this.Context.Channel as ITextChannel).DeleteMessagesAsync(messages);
-                    messages = await this.Context.Channel.GetMessagesAsync(100).FlattenAsync();
+                    int messageCount = await _discordService.DeleteMessage(textChannel);
+                    while (messageCount == 100)
+                    {
+                        messageCount = await _discordService.DeleteMessage(textChannel);
+                    }
                 }
             });
         }
@@ -131,68 +147,10 @@ namespace DiscordPokemonNameBot.Module
         [RequireBotPermission(ChannelPermission.SendMessages)]
         public async Task DetectPokemon(string url)
         {
-            if (!Uri.IsWellFormedUriString(url, UriKind.Absolute) && !(url.EndsWith(".png") || url.EndsWith(".jpg")))
-            {
-                await RespondAsync("Invalid Url Provided");
-            }
-            UrlResponseByteContent response = await _httpHelper.GetUrlContent(url, HttpClientType.Discord.ToString());
+            _logger.CommandUsedLog("detectpokemon", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
 
-            if (_httpHelper.IsSuccessStatusCode(response.HttpStatusCode))
-            {
-                string pokemonName = PredictPokemon(response.Content);
-                if (string.IsNullOrEmpty(pokemonName))
-                {
-                    return;
-                }
-
-                string[] pokemon = pokemonName.Split(';');
-                await RespondAsync(pokemon[0]);
-            }
-            else if (response.Content != null)
-            {
-                string errorMessage = Encoding.UTF8.GetString(response.Content);
-                await RespondAsync(errorMessage);
-            }
-        }
-
-        private async Task MessageSpammer(SpamMessageType type, int count)
-        {
-            switch (type)
-            {
-                case SpamMessageType.Paragraph:
-                    _message.Message = await _api.GetRandomParagraphs(count);
-                    break;
-                case SpamMessageType.Beer:
-                    _message.Message = await _api.GetRandomBeers(count);
-                    break;
-                case SpamMessageType.Default:
-
-                    _message.Message = await _api.GetRandomParagraphs(count);
-                    break;
-            }
-            if(!string.IsNullOrEmpty(_message.Message))
-            {
-                await _api.SendMessageToDiscord(_message.Message);
-            }
-        }
-
-        private async Task DeleteNMessage(int count)
-        {
-            if (count > 99)
-            {
-                count = 99;
-            }
-            IEnumerable<IMessage> messages = await this.Context.Channel.GetMessagesAsync(count + 1).FlattenAsync();
-            if (this.Context?.Channel != null)
-            {
-                await (this.Context.Channel as ITextChannel).DeleteMessagesAsync(messages);
-            }
-        }
-
-        private string PredictPokemon(byte[]? content)
-        {
-            string pokemonName = _predictor.PredictSingle(_predictionEngine.GetPredictionEngine(), content);
-            return pokemonName;
+            Embed pokemonEmbed = await _pokemonService.PredictPokemon(url);
+            await RespondAsync("", new[] { pokemonEmbed }, false);
         }
     }
 }
