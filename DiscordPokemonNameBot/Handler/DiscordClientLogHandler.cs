@@ -16,14 +16,12 @@ namespace DiscordPokemonNameBot.Handler
         private readonly IAppLogger _logger;
         private readonly DiscordShardedClient _client;
         private readonly InteractionService _interactionService;
-        private readonly IAppConfiguration _appConfiguration;
 
-        public DiscordClientLogHandler(IAppLogger logger, DiscordShardedClient client, InteractionService interactionService, IAppConfiguration appConfiguration)
+        public DiscordClientLogHandler(IAppLogger logger, DiscordShardedClient client, InteractionService interactionService)
         {
             _logger = logger;
             _client = client;
             _interactionService = interactionService;
-            _appConfiguration = appConfiguration;
         }
 
         public void Initialize()
@@ -44,6 +42,10 @@ namespace DiscordPokemonNameBot.Handler
 
         private async Task ShardLatencyUpdatedEvent(int oldPing, int updatedPing, DiscordSocketClient client)
         {
+            if(oldPing < 500 && updatedPing < 500) 
+            {
+                return;
+            }
             string message = $"Shard latency updated from {oldPing}ms to {updatedPing}ms";
             await _logger.DiscrodChannelLogger(message, Constants.GuildId, Constants.BotLatencyChannel);
         }
@@ -76,7 +78,14 @@ namespace DiscordPokemonNameBot.Handler
         private Task LogEvent(LogMessage log)
         {
             string message = LogMessageBuilder.DiscordLogMessage(log);
-            _logger.FileLogger("discord", message);
+            if(log.Exception != null) 
+            {
+                _logger.ExceptionLog("Discord", log.Exception);
+            }
+            else
+            {
+                _logger.FileLogger("Discord", message);
+            }
             return Task.CompletedTask;
         }
     }

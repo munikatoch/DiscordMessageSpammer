@@ -56,6 +56,7 @@ namespace Logging
                 {
                     string fileContent = LogMessageBuilder.ExceptionMessageBuilder(exception);
                     sw.WriteLine(fileContent);
+                    sw.WriteLine(Constants.EOFMarkup);
                 }
             }
         }

@@ -24,6 +24,7 @@ namespace DiscordPokemonNameBot.Configuration
         {
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
+                .AddJsonFile("appsetting.json", optional: false, reloadOnChange: true)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .Build();
             return configuration;

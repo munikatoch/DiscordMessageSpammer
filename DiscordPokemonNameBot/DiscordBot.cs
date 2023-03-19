@@ -36,7 +36,7 @@ namespace DiscordPokemonNameBot
             await _client.LoginAsync(TokenType.Bot, discordBotToken);
             await _client.StartAsync();
 
-            await Task.Delay(-1);
+            await Task.Delay(Timeout.Infinite);
         }
     }
 }

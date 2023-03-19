@@ -23,8 +23,8 @@
 
         #region Logs
 
-        public readonly static string Logfolder = Path.Combine(ProjectRootDirectory, "log");
-        public readonly static string EOFMarkup = "----------------------------------------------------------------------------------------";
+        public readonly static string Logfolder = Path.Combine(ProjectRootDirectory, "Log");
+        public readonly static string EOFMarkup = "-------------------------------------------------------------------------------------------------------------------------------------------------";
 
         #endregion
 

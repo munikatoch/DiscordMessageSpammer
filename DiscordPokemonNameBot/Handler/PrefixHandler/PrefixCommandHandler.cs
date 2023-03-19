@@ -88,7 +88,6 @@ namespace DiscordPokemonNameBot.Handler.PrefixHandler
                                 sb.AppendLine($"Error: {result.Error}");
                             }
                             sb.AppendLine(result.ErrorReason);
-                            sb.AppendLine(Constants.EOFMarkup);
                             _logger.FileLogger("PrefixCommand/Unsuccessful", sb.ToString());
                             await message.ReplyAsync(result.ErrorReason);
                         }
