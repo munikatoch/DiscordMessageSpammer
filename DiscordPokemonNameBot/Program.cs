@@ -18,7 +18,7 @@ namespace DiscordPokemonNameBot
             modelTrainer.TrainerModel(isDeleteWorkspaceAndModel, isTrainModelAgain);
 
             IDiscordBot discordBot = Container.ResolveDiscordBot<IDiscordBot>();
-            discordBot.ConnectAndStartBot();
+            discordBot.ConnectAndStartBot().GetAwaiter().GetResult();
         }
     }
 }

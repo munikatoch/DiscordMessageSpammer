@@ -97,7 +97,6 @@ namespace DiscordPokemonNameBot
                 GatewayIntents = GatewayIntents.MessageContent |
                                  GatewayIntents.AllUnprivileged,
                 LogLevel = LogSeverity.Info,
-                TotalShards = 1
             });
 
             collection.AddSingleton(x => new CommandServiceConfig()

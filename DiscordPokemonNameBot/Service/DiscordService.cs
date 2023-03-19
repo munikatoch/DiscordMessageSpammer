@@ -1,4 +1,5 @@
 ﻿using Discord;
+using Interfaces;
 using Interfaces.Discord.Helper;
 using Interfaces.Discord.Service;
 using Models;
@@ -14,12 +15,14 @@ namespace DiscordPokemonNameBot.Service
         private readonly Random _random;
         private readonly IHttpHelper _httpHelper;
         private readonly MessageSpam _message;
+        private readonly IAppConfiguration _appConfiguration;
 
-        public DiscordService(Random random, IHttpHelper httpHelper, MessageSpam message)
+        public DiscordService(Random random, IHttpHelper httpHelper, MessageSpam message, IAppConfiguration appConfiguration)
         {
             _random = random;
             _httpHelper = httpHelper;
             _message = message;
+            _appConfiguration = appConfiguration;
         }
 
         public async Task CreateAndSendSpamMessage(ulong id)
@@ -29,7 +32,7 @@ namespace DiscordPokemonNameBot.Service
             {
                 case 0:
                     string? response = await _httpHelper.GetRequest<string>(Constants.RandomParagraphUrl, HttpClientType.RandomParagraph.ToString());
-                    _message.Message = response;
+                    _message.Message = "**Paragraph**\n" + response;
                     break;
                 case 1:
                     RandomJokeResponse? jokeResponse = await _httpHelper.GetRequest<RandomJokeResponse>(Constants.RandomJokeUrl, HttpClientType.RandomJoke.ToString());
@@ -43,13 +46,15 @@ namespace DiscordPokemonNameBot.Service
                         {
                             _message.Message = $"{jokeResponse.Setup}\n{jokeResponse.Delivery}";
                         }
+                        _message.Message = "**Joke**\n" + _message.Message;
                     }
                     break;
                 case 2:
-                    RandomQuoteResponse? quoteResponse = await _httpHelper.GetRequest<RandomQuoteResponse>(Constants.RandomQuoteUrl, HttpClientType.RandomQuote.ToString());
-                    if (quoteResponse != null)
+                    List<RandomQuoteResponse>? quoteResponses = await _httpHelper.GetRequest<List<RandomQuoteResponse>>(Constants.RandomQuoteUrl, HttpClientType.RandomQuote.ToString());
+                    if (quoteResponses != null && quoteResponses.Count > 0)
                     {
-                        _message.Message = $"{quoteResponse.Quote}\nBy - {quoteResponse.Author}";
+                        RandomQuoteResponse quoteResponse = quoteResponses.First();
+                        _message.Message = $"**Quote**\n{quoteResponse.Quote}\nBy - {quoteResponse.Author}";
                     }
                     break;
             }
@@ -73,8 +78,8 @@ namespace DiscordPokemonNameBot.Service
             string url = string.Format(Constants.DiscordMessageSpamUrl, id);
 
             DiscordMessageRequest request = CreateRequest(message);
-
-            await _httpHelper.FormUrlEcodedContentPostRequest(url, request, HttpClientType.Discord.ToString());
+            Dictionary<string, string> headers = CreateHeadersForDiscrodMessage();
+            await _httpHelper.FormUrlEcodedContentPostRequest(url, request, HttpClientType.Discord.ToString(), headers);
         }
 
         private DiscordMessageRequest CreateRequest(string content)
@@ -83,6 +88,14 @@ namespace DiscordPokemonNameBot.Service
             {
                 Content = content
             };
+        }
+
+        private Dictionary<string, string> CreateHeadersForDiscrodMessage()
+        {
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+            var userToken = _appConfiguration.GetAppSettingValue("DiscordUserAuthToken", string.Empty);
+            headers.Add("authorization", userToken);
+            return headers;
         }
     }
 }

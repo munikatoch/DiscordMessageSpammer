@@ -4,6 +4,7 @@ using Interfaces.Discord.Service;
 using Microsoft.Extensions.ML;
 using Microsoft.ML;
 using Models;
+using Models.Discord;
 using Models.Discord.Common;
 using Models.MlModelTrainer;
 
@@ -22,10 +23,14 @@ namespace DiscordPokemonNameBot.Service
             _httpHelper = httpHelper;
         }
 
-        public async Task<Embed> PredictPokemon(string url)
+        public async Task<PokemonPrediction> PredictPokemon(string url)
         {
             EmbedBuilder embed = new EmbedBuilder();
             embed.Title = "Error occured while predicting the pokemon!!!";
+            PokemonPrediction predictedPokemon = new PokemonPrediction()
+            {
+                PokemonEmbed = embed.Build()
+            };
             byte[]? imageContent = await _httpHelper.GetImageContent(url, HttpClientType.Pokemon.ToString());
             if (imageContent != null && imageContent.Length > 0)
             {
@@ -35,31 +40,40 @@ namespace DiscordPokemonNameBot.Service
                     Image = imageContent
                 };
                 ModelOutput prediction = predictionEngine.Predict(imageToPredict);
-                BuildEmbed(embed, prediction);
+                predictedPokemon = BuildPokemonPredictionModel(embed, prediction);
+                return predictedPokemon;
             }
-            return embed.Build();
+            return predictedPokemon;
         }
 
-        private void BuildEmbed(EmbedBuilder embed, ModelOutput prediction)
+        private PokemonPrediction BuildPokemonPredictionModel(EmbedBuilder embed, ModelOutput prediction)
         {
+            PokemonPrediction predictedPokemon = new PokemonPrediction();
             string[] pokemonTrait = prediction.PredictedPokemonLabel.Split('|');
 
             embed.Title = "Spawned Pokemon Name !!!";
-            embed.Description = $"Prediction Accuracy: {prediction.Score.Max() * 100}";
-            embed.AddField("Pokemon Name", pokemonTrait[0]);
+            embed.Description = $"Pokemon prediction";
+            embed.AddField("Prediction Accuracy: ", prediction.Score.Max() * 100);
+            embed.AddField("Pokemon Name: ", pokemonTrait[0]);
 
             if (pokemonTrait.Length > 1)
             {
                 if (pokemonTrait[1].Equals("2")) //Rare Pokemon
                 {
-                    embed.AddField("Role Tag", $"<@&{Constants.PokemonRarePingRoleId}>");
+                    predictedPokemon.RoleTag = $"<@&{Constants.PokemonRarePingRoleId}>";
+                    predictedPokemon.FollowUpMessageOnRarePing = "Please start the message spam again to start spawning the pokemons again";
                     _messageSpam.IsSpamMessageEnabled = false;
                 }
-                else if (pokemonTrait[1].Equals("3"))
+                else if (pokemonTrait[1].Equals("3")) //Shadow Pokemon
                 {
                     // TO-DO for shadow pokemons
                 }
             }
+            embed.WithCurrentTimestamp();
+
+            predictedPokemon.PokemonEmbed = embed.Build();
+
+            return predictedPokemon;
         }
     }
 }

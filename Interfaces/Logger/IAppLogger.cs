@@ -12,6 +12,6 @@ namespace Interfaces.Logger
         void FileLogger(string folder, string message);
         Task DiscrodChannelLogger(string message, ulong guildId, ulong channelId);
         void ExceptionLog(string folder, Exception exception);
-        void CommandUsedLog(string command, ulong channelId, ulong userId, ulong guildId);
+        void CommandUsedLog(string folder, string command, ulong channelId, ulong userId, ulong guildId);
     }
 }

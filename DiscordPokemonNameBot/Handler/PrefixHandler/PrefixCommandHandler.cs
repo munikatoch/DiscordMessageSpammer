@@ -7,6 +7,7 @@ using Interfaces.Discord.Handler.PrefixHandler;
 using Interfaces.Discord.Service;
 using Interfaces.Logger;
 using Models;
+using Models.Discord;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,8 +65,12 @@ namespace DiscordPokemonNameBot.Handler.PrefixHandler
                 {
                     if (_prefixService.ValidatePokemonSpanMessage(message, out Embed? embed) && embed != null && embed.Image.HasValue)
                     {
-                        Embed pokemonEmbed = await _pokemonService.PredictPokemon(embed.Image.Value.Url);
-                        await message.ReplyAsync("", false, pokemonEmbed);
+                        PokemonPrediction predictedPokemon = await _pokemonService.PredictPokemon(embed.Image.Value.Url);
+                        await message.ReplyAsync(predictedPokemon.RoleTag, false, predictedPokemon.PokemonEmbed);
+                        if(!string.IsNullOrEmpty(predictedPokemon.FollowUpMessageOnRarePing))
+                        {
+                            await message.Channel.SendMessageAsync(predictedPokemon.FollowUpMessageOnRarePing);
+                        }
                     }
                 }
                 else

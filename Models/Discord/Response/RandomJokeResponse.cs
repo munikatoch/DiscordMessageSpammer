@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Models.Discord.Response
@@ -10,6 +11,8 @@ namespace Models.Discord.Response
     {
         public bool Error { get; set; }
         public string Category { get; set; }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public JokeType Type { get; set; }
         public string Setup { get; set; }
         public string Delivery { get; set; }
@@ -17,7 +20,7 @@ namespace Models.Discord.Response
         public Flag Flags { get; set; }
         public int Id { get; set; }
         public bool Safe { get; set; }
-        public bool Lang { get; set; }
+        public string Lang { get; set; }
     }
 
     public enum JokeType 

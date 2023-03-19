@@ -1,9 +1,9 @@
-﻿using Discord;
+﻿using Models.Discord;
 
 namespace Interfaces.Discord.Service
 {
     public interface IPokemonService
     {
-        Task<Embed> PredictPokemon(string url);
+        Task<PokemonPrediction> PredictPokemon(string url);
     }
 }

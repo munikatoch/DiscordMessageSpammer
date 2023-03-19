@@ -1,4 +1,5 @@
-﻿using Interfaces.Discord.Helper;
+﻿using Common;
+using Interfaces.Discord.Helper;
 using Interfaces.Logger;
 using Models;
 using System.Net;
@@ -34,7 +35,7 @@ namespace DiscordPokemonNameBot.Helper
                         }
                         else
                         {
-                            string message = await CreateHttpUnsuccessLogMessage(response);
+                            string message = await LogMessageBuilder.CreateHttpUnsuccessLogMessage(response);
                             _appLogger.FileLogger("Http/Unsuccess", message);
                         }
                     }
@@ -47,8 +48,8 @@ namespace DiscordPokemonNameBot.Helper
         {
             if(ValidateAndParseUrl(url, out Uri? uri)) 
             {
-                Dictionary<string, string?> contentKeyValuePair = request.GetType().GetProperties().ToDictionary(x => x.Name, x => x.GetValue(request)?.ToString());
-                FormUrlEncodedContent content = new FormUrlEncodedContent(contentKeyValuePair);
+                Dictionary<string, string?> contentKeyValuePair = request.GetType().GetProperties().ToDictionary(x => x.Name.ToLower(), x => x.GetValue(request)?.ToString());
+                FormUrlEncodedContent content = new FormUrlEncodedContent(contentKeyValuePair); //content
                 using (HttpClient client = _clientFactory.CreateClient(type))
                 {
                     if (header != null && header.Count > 0)
@@ -59,7 +60,7 @@ namespace DiscordPokemonNameBot.Helper
                     {
                         if (!response.IsSuccessStatusCode)
                         {
-                            string message = await CreateHttpUnsuccessLogMessage(response);
+                            string message = await LogMessageBuilder.CreateHttpUnsuccessLogMessage(response);
                             _appLogger.FileLogger("Http/Unsuccess", message);
                         }
                     }
@@ -79,15 +80,30 @@ namespace DiscordPokemonNameBot.Helper
                         if (response.IsSuccessStatusCode) 
                         {
                             string data = await response.Content.ReadAsStringAsync();
-                            result = JsonSerializer.Deserialize<T>(data, new JsonSerializerOptions()
+
+                            try
                             {
-                                PropertyNameCaseInsensitive = false
-                            });
-                            return result;
+                                if(TypeUtil.IsJson(data)) 
+                                {
+                                    result = JsonSerializer.Deserialize<T>(data, new JsonSerializerOptions()
+                                    {
+                                        PropertyNameCaseInsensitive = true
+                                    });
+                                    return result;
+                                }
+                                else
+                                {
+                                    return (T)Convert.ChangeType(data, typeof(T));
+                                }
+                            }
+                            catch(Exception ex)
+                            {
+                                _appLogger.ExceptionLog("JsonParse", ex);
+                            }
                         }
                         else
                         {
-                            string message = await CreateHttpUnsuccessLogMessage(response);
+                            string message = await LogMessageBuilder.CreateHttpUnsuccessLogMessage(response);
                             _appLogger.FileLogger("Http/Unsuccess", message);
                         }
                     }
@@ -111,22 +127,6 @@ namespace DiscordPokemonNameBot.Helper
         private bool ValidateAndParseUrl(string url, out Uri? uri)
         {
             return Uri.TryCreate(url, UriKind.Absolute, out uri) && uri != null && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
-        }
-
-        private async Task<string> CreateHttpUnsuccessLogMessage(HttpResponseMessage response)
-        {
-            string httpResponse = await response.Content.ReadAsStringAsync();
-            StringBuilder sb = new StringBuilder();
-
-            sb.AppendLine($"Status Code: {response.StatusCode}");
-
-            if(response.RequestMessage?.RequestUri?.AbsolutePath != null)
-            {
-                sb.AppendLine($"Url: {response.RequestMessage?.RequestUri?.AbsolutePath}");
-            }
-            sb.AppendLine($"Response: {httpResponse}");
-            sb.AppendLine(Constants.EOFMarkup);
-            return sb.ToString();
         }
     }
 }

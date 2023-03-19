@@ -14,10 +14,10 @@ namespace Logging
             _client = client;
         }
 
-        public void CommandUsedLog(string command, ulong channelId, ulong userId, ulong guildId)
+        public void CommandUsedLog(string folder, string command, ulong channelId, ulong userId, ulong guildId)
         {
             string commandLogMessage = $"GuildId: {guildId} || ChannelId: {channelId} || UserId: {userId} || Command Used: {command}";
-            FileLogger("CommandUsedLog", commandLogMessage);
+            FileLogger(folder, commandLogMessage);
         }
 
         public void ConsoleLogger(string message, ConsoleColor color = ConsoleColor.Gray)
@@ -32,8 +32,14 @@ namespace Logging
             _ = Task.Run(async () =>
             {
                 var guild = _client.GetGuild(guildId);
-                var channel = guild.GetTextChannel(channelId);
-                await channel.SendMessageAsync($"Message: {message}");
+                if(guild != null)
+                {
+                    var channel = guild.GetTextChannel(channelId);
+                    if(channel != null) 
+                    {
+                        await channel.SendMessageAsync($"Message: {message}");
+                    }
+                }
             });
             return Task.CompletedTask;
         }

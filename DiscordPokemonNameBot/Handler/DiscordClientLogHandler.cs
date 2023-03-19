@@ -2,6 +2,7 @@
 using Discord;
 using Discord.Interactions;
 using Discord.WebSocket;
+using DiscordPokemonNameBot.Configuration;
 using Interfaces;
 using Interfaces.Discord.Handler;
 using Interfaces.Logger;
@@ -15,12 +16,14 @@ namespace DiscordPokemonNameBot.Handler
         private readonly IAppLogger _logger;
         private readonly DiscordShardedClient _client;
         private readonly InteractionService _interactionService;
+        private readonly IAppConfiguration _appConfiguration;
 
-        public DiscordClientLogHandler(IAppLogger logger, DiscordShardedClient client, InteractionService interactionService)
+        public DiscordClientLogHandler(IAppLogger logger, DiscordShardedClient client, InteractionService interactionService, IAppConfiguration appConfiguration)
         {
             _logger = logger;
             _client = client;
             _interactionService = interactionService;
+            _appConfiguration = appConfiguration;
         }
 
         public void Initialize()
@@ -61,7 +64,11 @@ namespace DiscordPokemonNameBot.Handler
 
         private async Task ShardReadyEvent(DiscordSocketClient client)
         {
+#if DEBUG
+            await _interactionService.RegisterCommandsToGuildAsync(Constants.GuildId);
+#else
             await _interactionService.RegisterCommandsGloballyAsync();
+#endif
             string message = $"ShardId: {client.ShardId} is Ready, Latency: {client.Latency}ms";
             _logger.ConsoleLogger(message, ConsoleColor.Green);
         }
