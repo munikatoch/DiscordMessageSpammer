@@ -1,97 +1,132 @@
-﻿using DiscordPokemonNameBot.Model;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
+﻿using Common;
+using Interfaces.Discord.Helper;
+using Interfaces.Logger;
+using Models;
 using System.Net;
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Security.Policy;
 using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace DiscordPokemonNameBot.Helper
 {
-    public class HttpHelper
+    public class HttpHelper : IHttpHelper
     {
         private IHttpClientFactory _clientFactory;
+        private IAppLogger _appLogger;
 
-        public HttpHelper(IHttpClientFactory clientFactory)
+        public HttpHelper(IHttpClientFactory clientFactory, IAppLogger appLogger)
         {
             _clientFactory = clientFactory;
+            _appLogger = appLogger;
         }
 
-        public async Task<string> GetRequestAsString(string uri, string type)
-        {
-            try
-            {
-                HttpClient client = _clientFactory.CreateClient(type);
-                HttpResponseMessage response = await client.GetAsync(uri);
-                string data = await response.Content.ReadAsStringAsync();
-                if (response.IsSuccessStatusCode)
-                {
-                    return data;
-                }
-                else
-                {
-                    Console.WriteLine(response.StatusCode + "\nData: " + data);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            return string.Empty;
-        }
-
-        public async Task<UrlResponseByteContent> GetUrlContent(string url, string type)
+        public async Task<byte[]?> GetImageContent(string url, string type)
         {
             byte[]? content = new byte[0];
-            HttpStatusCode httpStatusCode = HttpStatusCode.BadRequest;
-            try
-            {
-                HttpClient client = _clientFactory.CreateClient(type);
-                HttpResponseMessage response = await client.GetAsync(url);
-                httpStatusCode = response.StatusCode;
-                content = await response.Content.ReadAsByteArrayAsync();
-                response.Dispose();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            return new UrlResponseByteContent()
-            {
-                Content = content,
-                HttpStatusCode = httpStatusCode
-            };
-        }
 
-        public async Task PostRequestWithAuthToken(string discordURI, DiscordMessageRequest spamMessageContent, string type)
-        {
-            try
+            if (ValidateAndParseUrl(url, out Uri? uri))
             {
-                Dictionary<string, string> contentKeyValuePair = new Dictionary<string, string>();
-                contentKeyValuePair.Add("content", spamMessageContent.Content);
-                FormUrlEncodedContent content = new FormUrlEncodedContent(contentKeyValuePair);
-                HttpClient client = _clientFactory.CreateClient(type);
-                HttpResponseMessage response = await client.PostAsync(discordURI, content);
-                if (!response.IsSuccessStatusCode)
+                using (HttpClient client = _clientFactory.CreateClient(type))
                 {
-                    string data = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine(response.StatusCode + "\nData: " + data);
+                    using (HttpResponseMessage response = await client.GetAsync(uri))
+                    {
+                        if(response.IsSuccessStatusCode) 
+                        {
+                            content = await response.Content.ReadAsByteArrayAsync();
+                        }
+                        else
+                        {
+                            string message = await LogMessageBuilder.CreateHttpUnsuccessLogMessage(response);
+                            _appLogger.FileLogger("Http/Unsuccess", message);
+                        }
+                    }
                 }
             }
-            catch (Exception ex)
+            return content;
+        }
+
+        public async Task FormUrlEcodedContentPostRequest<T>(string url, T request, string type, Dictionary<string, string>? header = null) where T : notnull
+        {
+            if(ValidateAndParseUrl(url, out Uri? uri)) 
             {
-                Console.WriteLine(ex.Message);
+                Dictionary<string, string?> contentKeyValuePair = request.GetType().GetProperties().ToDictionary(x => x.Name.ToLower(), x => x.GetValue(request)?.ToString());
+                FormUrlEncodedContent content = new FormUrlEncodedContent(contentKeyValuePair); //content
+                using (HttpClient client = _clientFactory.CreateClient(type))
+                {
+                    if (header != null && header.Count > 0)
+                    {
+                        AddOrUpdateHeader(client, header);
+                    }
+                    using (HttpResponseMessage response = await client.PostAsync(uri, content))
+                    {
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            string message = await LogMessageBuilder.CreateHttpUnsuccessLogMessage(response);
+                            _appLogger.FileLogger("Http/Unsuccess", message);
+                        }
+                    }
+                }
             }
         }
 
-        public bool IsSuccessStatusCode(HttpStatusCode httpStatusCode)
+        public async Task<T?> GetRequest<T>(string url, string type) where T : notnull
         {
-            return ((int) httpStatusCode >= 200) && ((int) httpStatusCode <= 299);
+            T? result;
+            if(ValidateAndParseUrl(url, out Uri? uri))
+            {
+                using (HttpClient client = _clientFactory.CreateClient(type))
+                {
+                    using (HttpResponseMessage response = await client.GetAsync(uri))
+                    {
+                        if (response.IsSuccessStatusCode) 
+                        {
+                            string data = await response.Content.ReadAsStringAsync();
+
+                            try
+                            {
+                                if(TypeUtil.IsJson(data)) 
+                                {
+                                    result = JsonSerializer.Deserialize<T>(data, new JsonSerializerOptions()
+                                    {
+                                        PropertyNameCaseInsensitive = true
+                                    });
+                                    return result;
+                                }
+                                else
+                                {
+                                    return (T)Convert.ChangeType(data, typeof(T));
+                                }
+                            }
+                            catch(Exception ex)
+                            {
+                                _appLogger.ExceptionLog("JsonParse", ex);
+                            }
+                        }
+                        else
+                        {
+                            string message = await LogMessageBuilder.CreateHttpUnsuccessLogMessage(response);
+                            _appLogger.FileLogger("Http/Unsuccess", message);
+                        }
+                    }
+                }
+            }
+            return default(T);
+        }
+
+        private void AddOrUpdateHeader(HttpClient client, Dictionary<string, string> header)
+        {
+            foreach (KeyValuePair<string, string> keyValuePair in header)
+            {
+                if (client.DefaultRequestHeaders.Contains(keyValuePair.Key))
+                {
+                    client.DefaultRequestHeaders.Remove(keyValuePair.Key);
+                }
+                client.DefaultRequestHeaders.Add(keyValuePair.Key, keyValuePair.Value);
+            }
+        }
+
+        private bool ValidateAndParseUrl(string url, out Uri? uri)
+        {
+            return Uri.TryCreate(url, UriKind.Absolute, out uri) && uri != null && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
         }
     }
 }

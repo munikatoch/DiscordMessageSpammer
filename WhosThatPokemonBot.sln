@@ -3,9 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokemonPredictor", "PokemonPredictor\PokemonPredictor.csproj", "{D64FE23A-0720-4633-812E-5E04936833E2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PokemonPredictor", "PokemonPredictor\PokemonPredictor.csproj", "{D64FE23A-0720-4633-812E-5E04936833E2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordPokemonNameBot", "DiscordPokemonNameBot\DiscordPokemonNameBot.csproj", "{E684A28A-77D7-46DF-A71A-DEAB2832E714}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiscordPokemonNameBot", "DiscordPokemonNameBot\DiscordPokemonNameBot.csproj", "{E684A28A-77D7-46DF-A71A-DEAB2832E714}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Interfaces", "Interfaces\Interfaces.csproj", "{FBCFAC47-D4CA-445F-8896-6F013412C271}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Models\Models.csproj", "{01F7F6FF-690E-4FED-A50E-305A65A1F970}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logging", "AppLogger\Logging.csproj", "{0426C623-EF0C-498E-A557-8807DD22005A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{E2AEC371-AEFA-420F-AF88-8BC2A06A0979}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +29,22 @@ Global
 		{E684A28A-77D7-46DF-A71A-DEAB2832E714}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E684A28A-77D7-46DF-A71A-DEAB2832E714}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E684A28A-77D7-46DF-A71A-DEAB2832E714}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBCFAC47-D4CA-445F-8896-6F013412C271}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBCFAC47-D4CA-445F-8896-6F013412C271}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBCFAC47-D4CA-445F-8896-6F013412C271}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBCFAC47-D4CA-445F-8896-6F013412C271}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01F7F6FF-690E-4FED-A50E-305A65A1F970}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01F7F6FF-690E-4FED-A50E-305A65A1F970}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01F7F6FF-690E-4FED-A50E-305A65A1F970}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01F7F6FF-690E-4FED-A50E-305A65A1F970}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0426C623-EF0C-498E-A557-8807DD22005A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0426C623-EF0C-498E-A557-8807DD22005A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0426C623-EF0C-498E-A557-8807DD22005A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0426C623-EF0C-498E-A557-8807DD22005A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2AEC371-AEFA-420F-AF88-8BC2A06A0979}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2AEC371-AEFA-420F-AF88-8BC2A06A0979}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2AEC371-AEFA-420F-AF88-8BC2A06A0979}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2AEC371-AEFA-420F-AF88-8BC2A06A0979}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
