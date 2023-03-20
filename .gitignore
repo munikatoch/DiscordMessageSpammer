@@ -11,7 +11,7 @@ packages/
 
 # App config
 *.config
-
+*.json
 
 #Folders
 Assets/
