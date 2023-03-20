@@ -75,7 +75,7 @@ namespace DiscordPokemonNameBot.Module
             )
         {
             _logger.CommandUsedLog(_folderName, "startspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
-            
+
             if (duration < 0)
             {
                 await RespondAsync("What is this sorcery? You have to teach me sensie how to use negative duration");
@@ -85,14 +85,14 @@ namespace DiscordPokemonNameBot.Module
             {
                 await RespondAsync("Message will spam at a range of 5s to 15s per message as duration was default or 0");
             }
-            else if(duration < 5)
+            else if (duration < 5)
             {
                 await RespondAsync("Message will spam at 5s per message as this is the minimum");
                 duration = 5;
             }
             else
             {
-                await RespondAsync("Message spam start");
+                await RespondAsync($"Message spam at {duration}s per message");
             }
             _message.IsGenerateRandomDurationEnabled = duration == 0;
             _message.DurationInSeconds = TimeSpan.FromSeconds(duration);
@@ -114,10 +114,6 @@ namespace DiscordPokemonNameBot.Module
                         await _discordService.CreateAndSendSpamMessage(channel.Id);
                     }
                 });
-            }
-            else
-            {
-                await RespondAsync("Message spam updated");
             }
         }
 

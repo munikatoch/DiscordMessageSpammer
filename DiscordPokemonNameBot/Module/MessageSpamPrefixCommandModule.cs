@@ -78,7 +78,7 @@ namespace DiscordPokemonNameBot.Module
                 await Context.Message.ReplyAsync("What is this sorcery? You have to teach me sensie how to use negative duration");
                 return;
             }
-            else if(duration == 0)
+            else if (duration == 0)
             {
                 await Context.Message.ReplyAsync("Message will spam at a range of 5s to 15s per message as duration was default or 0");
             }
