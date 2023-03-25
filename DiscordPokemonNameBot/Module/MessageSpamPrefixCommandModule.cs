@@ -89,7 +89,7 @@ namespace DiscordPokemonNameBot.Module
             }
             else
             {
-                await Context.Message.ReplyAsync("Message spam start");
+                await Context.Message.ReplyAsync($"Message spam at {duration}s per message");
             }
             _message.IsGenerateRandomDurationEnabled = duration == 0;
             _message.DurationInSeconds = TimeSpan.FromSeconds(duration);

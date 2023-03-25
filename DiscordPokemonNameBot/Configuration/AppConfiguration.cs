@@ -22,10 +22,13 @@ namespace DiscordPokemonNameBot.Configuration
 
         private IConfigurationRoot BuildConfiguration()
         {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(AppContext.BaseDirectory)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
+            var configurationBuilder = new ConfigurationBuilder()
+                .SetBasePath(AppContext.BaseDirectory);
+            if (File.Exists("appsettings.json"))
+            {
+                configurationBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+            }
+            IConfigurationRoot configuration = configurationBuilder.Build();
             return configuration;
         }
 

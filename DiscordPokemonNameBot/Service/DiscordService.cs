@@ -66,10 +66,26 @@ namespace DiscordPokemonNameBot.Service
 
         public async Task<int> DeleteMessage(ITextChannel textChannel, int count = 99)
         {
-            IEnumerable<IMessage> messages = await textChannel.GetMessagesAsync(count + 1).FlattenAsync();
-            int messageCount = messages.Count();
-            if (messageCount > 0)
-                await textChannel.DeleteMessagesAsync(messages);
+            int messageCount = 0;
+            await textChannel.GetMessagesAsync(count + 1, CacheMode.AllowDownload, new RequestOptions()).ForEachAwaitAsync(async x =>
+            {
+                messageCount = x.Count;
+                var firstMessage = x.FirstOrDefault();
+                if (firstMessage != null && (DateTimeOffset.UtcNow - firstMessage.CreatedAt) > TimeSpan.FromDays(14))
+                {
+                    foreach (IMessage message in x)
+                    {
+                        await textChannel.DeleteMessageAsync(message.Id).ConfigureAwait(false);
+                    }
+                }
+                else
+                {
+                    await textChannel.DeleteMessagesAsync(x, new RequestOptions()
+                    {
+                        Timeout = 1000
+                    });
+                }
+            });
             return messageCount;
         }
 

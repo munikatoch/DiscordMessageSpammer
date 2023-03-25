@@ -66,7 +66,7 @@ namespace DiscordPokemonNameBot.Service
                 }
                 else if (pokemonTrait[1].Equals("3")) //Shadow Pokemon
                 {
-                    // TO-DO for shadow pokemons
+                    predictedPokemon.RoleTag = $"<@&{Constants.PokemonShadowPingRoleId}>";
                 }
             }
             embed.WithCurrentTimestamp();

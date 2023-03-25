@@ -31,6 +31,7 @@
         #region
         public readonly static ulong PokemonBotAuthorId = 669228505128501258;
         public readonly static ulong PokemonRarePingRoleId = 1045590165747400777;
+        public readonly static ulong PokemonShadowPingRoleId = 1088862418907709530;
 
         //Below this are all ID of primary server for testing and contact
         public readonly static ulong GuildId = 1037542119319015424;
