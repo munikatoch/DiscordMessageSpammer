@@ -4,11 +4,12 @@
     {
         #region Ml Model
 
-        public readonly static string ProjectRootDirectory = Path.Combine(AppContext.BaseDirectory, "../../../..");
+        public readonly static string ProjectRootDirectory = GetProjectRootPath();
         public readonly static string MlModelWorkSpaceRelativePath = Path.Combine(ProjectRootDirectory, "PokemonPredictor/Workspace");
         public readonly static string MlModelAssestsInputRelativePath = Path.Combine(ProjectRootDirectory, "PokemonPredictor/Assets/Input");
-        public readonly static string MlModelAssestsOutputRelativePath = Path.Combine(ProjectRootDirectory, "PokemonPredictor/Assets/Output");
-        public readonly static string MlModelFilePath = Path.Combine(MlModelAssestsOutputRelativePath, "trainedmodel.zip");
+        public readonly static string MlModelAssestsOutputRelativePath = Path.Combine(ProjectRootDirectory, "PokemonPredictor/");
+        public readonly static string MlModelFileOutputPath = "Assets/Output/trainedmodel.zip";
+        public readonly static string MlModelFilePath = Path.Combine(MlModelAssestsOutputRelativePath, MlModelFileOutputPath);
 
         #endregion
 
@@ -41,5 +42,20 @@
         public readonly static ulong BotShardDisconnectedChannel = 1085966439409778699;
 
         #endregion
+
+        private static string GetProjectRootPath()
+        {
+            DirectoryInfo directory = new DirectoryInfo(AppContext.BaseDirectory);
+
+            int count = 0;
+
+            while (directory.Parent != null && count < 4)
+            {
+                directory = directory.Parent;
+                count++;
+            }
+            string root = directory.FullName;
+            return root;
+        }
     }
 }

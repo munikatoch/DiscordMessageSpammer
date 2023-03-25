@@ -142,7 +142,7 @@ namespace DiscordPokemonNameBot
 
             #region Pokemon Prediction
 
-            collection.AddPredictionEnginePool<ModelInput, ModelOutput>().FromFile(Constants.MlModelFilePath);
+            collection.AddPredictionEnginePool<ModelInput, ModelOutput>().FromFile(Constants.MlModelFileOutputPath);
             #endregion
 
             #region Http Client

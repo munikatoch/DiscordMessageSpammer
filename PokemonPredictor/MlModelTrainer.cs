@@ -24,7 +24,7 @@ namespace PokemonPredictor
 
         public void TrainerModel(bool isDeleteWorkspaceAndModel, bool isModelTrainAgain)
         {
-            FileUtils.CreateDirectoryIfNotExists(new string[] 
+            FileUtils.CreateDirectoryIfNotExists(new string[]
             {
                 Constants.MlModelAssestsInputRelativePath,
                 Constants.MlModelAssestsOutputRelativePath,
@@ -39,7 +39,7 @@ namespace PokemonPredictor
                 FileUtils.DeleteAllFiles(Constants.MlModelAssestsOutputRelativePath);
             }
 
-            if(!File.Exists(Constants.MlModelFilePath) || isModelTrainAgain)
+            if (!File.Exists(Constants.MlModelFileOutputPath) || isModelTrainAgain)
             {
                 TrainModel();
             }
@@ -123,7 +123,7 @@ namespace PokemonPredictor
         private void MlContextLoggig(object? sender, LoggingEventArgs e)
         {
             string logMessage = $"Source: {e.Source} || Message: {e.Message} || RawMessage: {e.RawMessage}";
-            if(sender != null)
+            if (sender != null)
             {
                 logMessage += $" || Sender: {sender}";
             }
@@ -150,7 +150,7 @@ namespace PokemonPredictor
                         pokemonType = 3;
                     }
                 }
-                if(label != null) 
+                if (label != null)
                 {
                     if (label.Equals("Mime Jr", StringComparison.InvariantCultureIgnoreCase))
                     {
