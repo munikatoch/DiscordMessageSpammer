@@ -7,6 +7,7 @@ This a self host bot which can predict pokemon spawned by pokemon discord bot
 - Spam messages to spawn pokemon
 - Delete messages
 - Predict pokemon
+- Will only run on one server, if you want to run in 2 servers then run to docker
 
 To start the bot you will need to have a dataset of pokemon images in the Assets input folder or if you have a trained
 dataset then add it in the Assets output folder. For schema of the model please see the [Model input] and [Model output] file.
