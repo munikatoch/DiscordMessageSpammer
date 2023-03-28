@@ -27,7 +27,7 @@ namespace DiscordPokemonNameBot
 
         public async Task ConnectAndStartBot()
         {
-            string discordBotToken = _appConfiguration.GetAppSettingValue("BotToken", string.Empty);
+            string discordBotToken = _appConfiguration.GetValue("DiscordBotToken", string.Empty);
 
             _clientLogHandler.Initialize();
             await _prefixHandler.InitializeAsync();

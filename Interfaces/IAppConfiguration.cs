@@ -8,6 +8,6 @@ namespace Interfaces
 {
     public interface IAppConfiguration
     {
-        T GetAppSettingValue<T>(string key, T defaultValue) where T : notnull;
+        T GetValue<T>(string key, T defaultValue) where T : notnull;
     }
 }

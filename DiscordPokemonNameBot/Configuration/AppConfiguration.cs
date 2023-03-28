@@ -28,20 +28,19 @@ namespace DiscordPokemonNameBot.Configuration
             {
                 configurationBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
             }
+            configurationBuilder.AddEnvironmentVariables();
             IConfigurationRoot configuration = configurationBuilder.Build();
             return configuration;
         }
 
-        public T GetAppSettingValue<T>(string key, T defaultValue) where T : notnull
+        public T GetValue<T>(string key, T defaultValue) where T : notnull
         {
-            if(Configuration.GetSection("appSettings") == null) 
+            T? value = Configuration.GetValue<T>(key, defaultValue);
+            if(value == null) 
             {
                 return defaultValue;
             }
-            else
-            {
-                return Configuration.GetSection("appSettings").GetValue<T>(key, defaultValue);
-            }
+            return value;
         }
     }
 }

@@ -109,7 +109,9 @@ namespace DiscordPokemonNameBot.Service
         private Dictionary<string, string> CreateHeadersForDiscrodMessage()
         {
             Dictionary<string, string> headers = new Dictionary<string, string>();
-            var userToken = _appConfiguration.GetAppSettingValue("DiscordUserAuthToken", string.Empty);
+
+            string userToken = _appConfiguration.GetValue("DiscordUserAuthToken", string.Empty);
+            
             headers.Add("authorization", userToken);
             return headers;
         }

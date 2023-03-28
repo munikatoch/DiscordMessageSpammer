@@ -11,8 +11,8 @@ namespace DiscordPokemonNameBot
             Container.Register();
 
             IAppConfiguration configuration = Container.ResolveDiscordBot<IAppConfiguration>();
-            bool isDeleteWorkspaceAndModel = configuration.GetAppSettingValue("RemoveFilesAndTrainModelAgain", false);
-            bool isTrainModelAgain = configuration.GetAppSettingValue("TrainModelAgain", false);
+            bool isDeleteWorkspaceAndModel = configuration.GetValue("RemoveFilesAndTrainModelAgain", false);
+            bool isTrainModelAgain = configuration.GetValue("TrainModelAgain", false);
 
             IMlModelTrainer modelTrainer = Container.ResolveMlModel<IMlModelTrainer>();
             modelTrainer.TrainerModel(isDeleteWorkspaceAndModel, isTrainModelAgain);
