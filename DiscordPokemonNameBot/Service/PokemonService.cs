@@ -60,13 +60,15 @@ namespace DiscordPokemonNameBot.Service
             {
                 if (pokemonTrait[1].Equals("2")) //Rare Pokemon
                 {
-                    predictedPokemon.RoleTag = $"<@&{Constants.PokemonRarePingRoleId}>";
+                    if(Constants.PokemonRarePingRoleId != 0)
+                        predictedPokemon.RoleTag = $"<@&{Constants.PokemonRarePingRoleId}>";
                     predictedPokemon.FollowUpMessageOnRarePing = "Please start the message spam again to start spawning the pokemons again";
                     _messageSpam.IsSpamMessageEnabled = false;
                 }
                 else if (pokemonTrait[1].Equals("3")) //Shadow Pokemon
                 {
-                    predictedPokemon.RoleTag = $"<@&{Constants.PokemonShadowPingRoleId}>";
+                    if(Constants.PokemonShadowPingRoleId != 0)
+                        predictedPokemon.RoleTag = $"<@&{Constants.PokemonShadowPingRoleId}>";
                 }
             }
             embed.WithCurrentTimestamp();
