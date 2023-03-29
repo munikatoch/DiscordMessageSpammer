@@ -33,7 +33,19 @@ namespace DiscordPokemonNameBot.Helper
                         {
                             if (response.IsSuccessStatusCode)
                             {
-                                content = await response.Content.ReadAsByteArrayAsync();
+                                if(response.Content.Headers.ContentType != null)
+                                {
+                                    string contentType = response.Content.Headers.ContentType.ToString();
+                                    if (contentType.StartsWith("image")) 
+                                    {
+                                        content = await response.Content.ReadAsByteArrayAsync();
+                                    }
+                                }
+                                else
+                                {
+                                    string message = $"{url} is not a image url";
+                                    _appLogger.FileLogger("Http/Unsuccess", message);
+                                }
                             }
                             else
                             {

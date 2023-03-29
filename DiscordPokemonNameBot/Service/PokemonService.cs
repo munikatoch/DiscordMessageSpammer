@@ -26,7 +26,7 @@ namespace DiscordPokemonNameBot.Service
         public async Task<PokemonPrediction> PredictPokemon(string url)
         {
             EmbedBuilder embed = new EmbedBuilder();
-            embed.Title = "Error occured while predicting the pokemon!!!";
+            embed.Title = "Error occured while predicting the pokemon. Please check the input";
             PokemonPrediction predictedPokemon = new PokemonPrediction()
             {
                 PokemonEmbed = embed.Build()
