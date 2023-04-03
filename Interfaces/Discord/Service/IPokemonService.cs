@@ -4,6 +4,6 @@ namespace Interfaces.Discord.Service
 {
     public interface IPokemonService
     {
-        Task<PokemonPrediction> PredictPokemon(string url);
+        Task<PokemonPrediction> PredictPokemon(string url, bool isPokemonSpawn);
     }
 }

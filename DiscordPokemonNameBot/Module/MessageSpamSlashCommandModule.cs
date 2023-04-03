@@ -151,7 +151,7 @@ namespace DiscordPokemonNameBot.Module
         {
             _logger.CommandUsedLog(_folderName, "detectpokemon", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
 
-            PokemonPrediction predictedPokemon = await _pokemonService.PredictPokemon(url);
+            PokemonPrediction predictedPokemon = await _pokemonService.PredictPokemon(url, false);
             await RespondAsync("", new[] { predictedPokemon.PokemonEmbed });
         }
     }

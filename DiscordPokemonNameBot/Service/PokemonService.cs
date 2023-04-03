@@ -23,7 +23,7 @@ namespace DiscordPokemonNameBot.Service
             _httpHelper = httpHelper;
         }
 
-        public async Task<PokemonPrediction> PredictPokemon(string url)
+        public async Task<PokemonPrediction> PredictPokemon(string url, bool isPokemonSpawn)
         {
             EmbedBuilder embed = new EmbedBuilder();
             embed.Title = "Error occured while predicting the pokemon. Please check the input";
@@ -40,13 +40,13 @@ namespace DiscordPokemonNameBot.Service
                     Image = imageContent
                 };
                 ModelOutput prediction = predictionEngine.Predict(imageToPredict);
-                predictedPokemon = BuildPokemonPredictionModel(embed, prediction);
+                predictedPokemon = BuildPokemonPredictionModel(embed, prediction, isPokemonSpawn);
                 return predictedPokemon;
             }
             return predictedPokemon;
         }
 
-        private PokemonPrediction BuildPokemonPredictionModel(EmbedBuilder embed, ModelOutput prediction)
+        private PokemonPrediction BuildPokemonPredictionModel(EmbedBuilder embed, ModelOutput prediction, bool isPokemonSpawn)
         {
             PokemonPrediction predictedPokemon = new PokemonPrediction();
             string[] pokemonTrait = prediction.PredictedPokemonLabel.Split('|');
@@ -56,7 +56,7 @@ namespace DiscordPokemonNameBot.Service
             embed.AddField("Prediction Accuracy: ", prediction.Score.Max() * 100);
             embed.AddField("Pokemon Name: ", pokemonTrait[0]);
 
-            if (pokemonTrait.Length > 1)
+            if (pokemonTrait.Length > 1 && isPokemonSpawn)
             {
                 if (pokemonTrait[1].Equals("2")) //Rare Pokemon
                 {

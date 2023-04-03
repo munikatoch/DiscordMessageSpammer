@@ -65,7 +65,7 @@ namespace DiscordPokemonNameBot.Handler.PrefixHandler
                 {
                     if (_prefixService.ValidatePokemonSpanMessage(message, out Embed? embed) && embed != null && embed.Image.HasValue)
                     {
-                        PokemonPrediction predictedPokemon = await _pokemonService.PredictPokemon(embed.Image.Value.Url);
+                        PokemonPrediction predictedPokemon = await _pokemonService.PredictPokemon(embed.Image.Value.Url, true);
                         await message.ReplyAsync(predictedPokemon.RoleTag, false, predictedPokemon.PokemonEmbed);
                         if(!string.IsNullOrEmpty(predictedPokemon.FollowUpMessageOnRarePing))
                         {
