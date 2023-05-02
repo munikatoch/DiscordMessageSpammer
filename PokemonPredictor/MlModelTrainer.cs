@@ -89,6 +89,7 @@ namespace PokemonPredictor
             ITransformer trainedModel = pipeline.Fit(trainDataset);
 
             _mlContext.Model.Save(trainedModel, trainDataset.Schema, Constants.MlModelFilePath);
+            _mlContext.Model.Save(trainedModel, trainDataset.Schema, Constants.MlModelFileOutputPath);
 
             EvaluateModel(_mlContext, testDataset, trainedModel);
         }
@@ -127,7 +128,7 @@ namespace PokemonPredictor
             {
                 logMessage += $" || Sender: {sender}";
             }
-            _appLoger.FileLogger("MlModel", logMessage);
+            _appLoger.ConsoleLogger(logMessage, ConsoleColor.Blue);
         }
 
         private IEnumerable<ImageData> LoadImagesFromDirectory(string folder)
