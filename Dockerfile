@@ -5,19 +5,12 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /whosthatpokemon
-COPY ["DiscordPokemonNameBot/DiscordPokemonNameBot.csproj", "DiscordPokemonNameBot/"]
-COPY ["PokemonPredictor/PokemonPredictor.csproj", "PokemonPredictor/"]
-COPY ["AppLogger/Logging.csproj", "AppLogger/"]
-COPY ["Common/Common.csproj", "Common/"]
-COPY ["Models/Models.csproj", "Models/"]
-COPY ["Interfaces/Interfaces.csproj", "Interfaces/"]
-RUN dotnet restore "DiscordPokemonNameBot/DiscordPokemonNameBot.csproj"
 COPY . .
 WORKDIR "/whosthatpokemon/DiscordPokemonNameBot"
 RUN dotnet build "DiscordPokemonNameBot.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "DiscordPokemonNameBot.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "DiscordPokemonNameBot.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
