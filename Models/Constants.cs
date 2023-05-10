@@ -5,11 +5,11 @@
         #region Ml Model
 
         public readonly static string ProjectRootDirectory = GetProjectRootPath();
-        public readonly static string MlModelWorkSpaceRelativePath = Path.Combine(ProjectRootDirectory, @"PokemonPredictor\Workspace");
-        public readonly static string MlModelAssestsInputRelativePath = Path.Combine(ProjectRootDirectory, @"PokemonPredictor\Assets\Input");
-        public readonly static string MlModelAssestsOutputRelativePath = Path.Combine(ProjectRootDirectory, @"PokemonPredictor\Assets\Output");
+        public readonly static string MlModelWorkSpaceRelativePath = Path.Combine(ProjectRootDirectory, "PokemonPredictor", "Workspace");
+        public readonly static string MlModelAssestsInputRelativePath = Path.Combine(ProjectRootDirectory, "PokemonPredictor", "Assets", "Input");
+        public readonly static string MlModelAssestsOutputRelativePath = Path.Combine(ProjectRootDirectory, "PokemonPredictor", "Assets", "Output");
         public readonly static string MlModelOutputFileName = "trainedmodel.zip";
-        public readonly static string MlModelFileOutputPath = Path.Combine(@"Assets\Output\", MlModelOutputFileName);
+        public readonly static string MlModelFileOutputPath = Path.Combine("Assets", "Output", MlModelOutputFileName);
         public readonly static string MlModelFilePath = Path.Combine(MlModelAssestsOutputRelativePath, MlModelOutputFileName);
 
         #endregion
