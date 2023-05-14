@@ -2,6 +2,11 @@
 {
     public class Constants
     {
+        #region Bot Version
+        public static readonly string BotVersion = "1.4";
+        #endregion
+
+
         #region Ml Model
 
         public static readonly string ProjectRootDirectory = GetProjectRootPath();

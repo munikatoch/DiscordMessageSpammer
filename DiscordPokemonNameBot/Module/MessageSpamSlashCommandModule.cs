@@ -5,6 +5,7 @@ using Interfaces.Logger;
 using Models.Discord.Common;
 using Discord.WebSocket;
 using Models.Discord;
+using Models;
 
 namespace DiscordPokemonNameBot.Module
 {
@@ -24,6 +25,14 @@ namespace DiscordPokemonNameBot.Module
             _message = message;
             _discordService = discordService;
             _pokemonService = pokemonService;
+        }
+
+        [SlashCommand("version", "Current Bot version")]
+        [RequireBotPermission(ChannelPermission.SendMessages)]
+        public async Task BotVersionn()
+        {
+            await RespondAsync("Bot version: " + Constants.BotVersion);
+            _logger.CommandUsedLog(_folderName, "version", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
         }
 
         [SlashCommand("hello", "Basic bot ping like Hello World")]

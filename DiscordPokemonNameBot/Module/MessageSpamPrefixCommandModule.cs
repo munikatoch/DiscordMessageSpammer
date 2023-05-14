@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Interfaces.Discord.Service;
 using Interfaces.Logger;
+using Models;
 using Models.Discord;
 using Models.Discord.Common;
 
@@ -24,6 +25,14 @@ namespace DiscordPokemonNameBot.Module
             _message = message;
             _discordService = discordService;
             _pokemonService = pokemonService;
+        }
+
+        [Command("version")]
+        [RequireBotPermission(ChannelPermission.SendMessages)]
+        public async Task BotVersionn()
+        {
+            await Context.Message.ReplyAsync("Bot version: " + Constants.BotVersion);
+            _logger.CommandUsedLog(_folderName, "version", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
         }
 
         [Command("hello")]
