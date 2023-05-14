@@ -16,11 +16,16 @@ namespace Common
             if (!string.IsNullOrEmpty(exceptionType))
                 sb.AppendLine($"{DateTime.Now:T} : Log excpetion type: {exceptionType}");
 
-            if(logMessage.Exception != null)
+            if (logMessage.Exception != null)
             {
                 sb.AppendLine(ExceptionMessageBuilder(logMessage.Exception));
             }
             return sb.ToString();
+        }
+
+        public static string TimeStatisticsMessageBuilder(string logMessageStart, long timeInMilliseconds, long timeInTicks)
+        {
+            return $"{logMessageStart} {timeInMilliseconds} ms | {timeInTicks} ticks";
         }
 
         public static string ExceptionMessageBuilder(Exception exception)

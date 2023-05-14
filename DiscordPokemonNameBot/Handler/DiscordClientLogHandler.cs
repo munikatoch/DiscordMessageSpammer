@@ -31,23 +31,16 @@ namespace DiscordPokemonNameBot.Handler
             _client.ShardConnected += ShardConnectedEvent;
             _client.ShardDisconnected += ShardDisconnectedEvent;
             _client.ShardLatencyUpdated += ShardLatencyUpdatedEvent;
-            _client.JoinedGuild += JoinedGuildEvent;
-        }
-
-        private async Task JoinedGuildEvent(SocketGuild guild)
-        {
-            string message = $"New server joined ID: {guild.Id}, Name: {guild.Name}, Total Members: {guild.MemberCount}";
-            await _logger.DiscrodChannelLogger(message, Constants.GuildId, Constants.BotGuildJoinChannel);
         }
 
         private async Task ShardLatencyUpdatedEvent(int oldPing, int updatedPing, DiscordSocketClient client)
         {
-            if(oldPing < 500 && updatedPing < 500) 
+            if(updatedPing < 500) 
             {
                 return;
             }
             string message = $"Shard latency updated from {oldPing}ms to {updatedPing}ms";
-            await _logger.DiscrodChannelLogger(message, Constants.GuildId, Constants.BotLatencyChannel);
+            await _logger.DiscrodChannelLogger(message, Constants.GuildId, Constants.BotLogsChannel);
         }
 
         private async Task ShardDisconnectedEvent(Exception exception, DiscordSocketClient client)

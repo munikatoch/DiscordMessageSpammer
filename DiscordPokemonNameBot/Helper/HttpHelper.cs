@@ -68,7 +68,7 @@ namespace DiscordPokemonNameBot.Helper
             if(ValidateAndParseUrl(url, out Uri? uri)) 
             {
                 Dictionary<string, string?> contentKeyValuePair = request.GetType().GetProperties().ToDictionary(x => x.Name.ToLower(), x => x.GetValue(request)?.ToString());
-                FormUrlEncodedContent content = new FormUrlEncodedContent(contentKeyValuePair); //content
+                FormUrlEncodedContent content = new FormUrlEncodedContent(contentKeyValuePair);
                 try
                 {
                     using (HttpClient client = _clientFactory.CreateClient(type))
