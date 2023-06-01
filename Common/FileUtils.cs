@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -48,6 +49,19 @@ namespace Common
             foreach (string file in files)
             {
                 File.Delete(file);
+            }
+        }
+
+        public static void DeleteAllLogFilesOlderThanTime(TimeSpan timeSpan)
+        {
+            IEnumerable<string> files = GetAllFilesInDirectory(Constants.Logfolder);
+            foreach(string file in files)
+            {
+                DateTime creationTime = File.GetCreationTimeUtc(file);
+                if(DateTime.UtcNow.Subtract(creationTime) > timeSpan)
+                {
+                    File.Delete(file);
+                }
             }
         }
     }

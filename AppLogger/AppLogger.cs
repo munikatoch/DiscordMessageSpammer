@@ -23,7 +23,7 @@ namespace Logging
         public void ConsoleLogger(string message, ConsoleColor color = ConsoleColor.Gray)
         {
             Console.ForegroundColor = color;
-            Console.WriteLine($"{DateTime.Now:hh:mm:ss.fff} : " + message);
+            Console.WriteLine($"{DateTime.UtcNow:hh:mm:ss.fff} : " + message);
             Console.ResetColor();
         }
 
@@ -46,10 +46,10 @@ namespace Logging
 
         public void ExceptionLog(string folder, Exception exception)
         {
-            var filePath = $"{Constants.Logfolder}/Exception/{folder}/{DateTime.Now:MMMM, yyyy}";
+            var filePath = $"{Constants.Logfolder}/Exception/{folder}";
             FileUtils.CreateDirectoryIfNotExists(filePath);
 
-            filePath += $"/{DateTime.Now:dddd, MMMM d, yyyy}.txt";
+            filePath += $"/{DateTime.UtcNow:yyyy-MM-dd}.txt";
             using (var file = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None))
             {
                 using (var sw = new StreamWriter(file))
@@ -63,15 +63,15 @@ namespace Logging
 
         public void FileLogger(string folder, string message)
         {
-            var filePath = $"{Constants.Logfolder}/{folder}/{DateTime.Now:MMMM, yyyy}";
+            var filePath = $"{Constants.Logfolder}/{folder}";
             FileUtils.CreateDirectoryIfNotExists(filePath);
 
-            filePath += $"/{DateTime.Now:dddd, MMMM d, yyyy}.txt";
+            filePath += $"/{DateTime.UtcNow:yyyy-MM-dd}.txt";
             using (var file = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None))
             {
                 using (var sw = new StreamWriter(file))
                 {
-                    sw.WriteLine($"{DateTime.Now:T} : Message : {message}");
+                    sw.WriteLine($"{DateTime.UtcNow:T} : Message : {message}");
                     sw.WriteLine(Constants.EOFMarkup);
                 }
             }

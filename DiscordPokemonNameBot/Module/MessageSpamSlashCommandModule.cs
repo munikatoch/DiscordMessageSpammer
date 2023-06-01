@@ -6,6 +6,8 @@ using Models.Discord.Common;
 using Discord.WebSocket;
 using Models.Discord;
 using Models;
+using Common;
+using System;
 
 namespace DiscordPokemonNameBot.Module
 {
@@ -39,7 +41,7 @@ namespace DiscordPokemonNameBot.Module
         [RequireBotPermission(ChannelPermission.SendMessages)]
         public async Task Ping()
         {
-            await RespondAsync("Hello " + Context.User.Mention + ". I am a bot!");
+            await RespondAsync("Hello " + Context.User.Mention + ". I am a bot and current bot latency is " + Context.Client.Latency + " ms");
             _logger.CommandUsedLog(_folderName, "hello", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
         }
 
@@ -84,6 +86,8 @@ namespace DiscordPokemonNameBot.Module
             )
         {
             _logger.CommandUsedLog(_folderName, "startspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
+
+            FileUtils.DeleteAllLogFilesOlderThanTime(TimeSpan.FromDays(7));
 
             if (duration < 0)
             {
@@ -160,8 +164,36 @@ namespace DiscordPokemonNameBot.Module
         {
             _logger.CommandUsedLog(_folderName, "detectpokemon", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
 
-            PokemonPrediction predictedPokemon = await _pokemonService.PredictPokemon(url, false);
-            await RespondAsync("", new[] { predictedPokemon.PokemonEmbed });
+            await Task.Run(async () =>
+            {
+                PokemonPrediction predictedPokemon = await _pokemonService.PredictPokemon(url, false);
+                await RespondAsync("", new[] { predictedPokemon.PokemonEmbed });
+            }).ConfigureAwait(false);
+        }
+
+        [SlashCommand("getlogs", "Get log files created")]
+        [RequireBotPermission(ChannelPermission.AttachFiles)]
+        public async Task GetDiscordBotLogs(string folder = "")
+        {
+            _logger.CommandUsedLog(_folderName, "getlogs", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
+
+            await RespondAsync("Here are all the files");
+            await Task.Run(async () =>
+            {
+                IEnumerable<string> files = FileUtils.GetAllFilesInDirectory(Constants.Logfolder);
+
+                List<FileAttachment> attachments = new List<FileAttachment>();
+
+                foreach (string file in files)
+                {
+                    if(string.IsNullOrEmpty(folder) || (!string.IsNullOrEmpty(folder) && file.Contains(folder)))
+                    {
+                        attachments.Add(new FileAttachment(file, description: "Log File"));
+                    }
+                }
+                await Context.Channel.SendFilesAsync(attachments);
+
+            }).ConfigureAwait(false);
         }
     }
 }

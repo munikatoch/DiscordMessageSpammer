@@ -66,26 +66,13 @@ namespace DiscordPokemonNameBot.Handler.PrefixHandler
                 {
                     if (_prefixService.ValidatePokemonSpanMessage(message, out Embed? embed) && embed != null && embed.Image.HasValue)
                     {
-                        Stopwatch predictionStopwatch= Stopwatch.StartNew();
-
                         PokemonPrediction predictedPokemon = await _pokemonService.PredictPokemon(embed.Image.Value.Url, true);
-
-                        predictionStopwatch.Stop();
-
-                        Stopwatch messageSendStopwatch = Stopwatch.StartNew();
 
                         await message.ReplyAsync(predictedPokemon.RoleTag, false, predictedPokemon.PokemonEmbed);
                         if(!string.IsNullOrEmpty(predictedPokemon.FollowUpMessageOnRarePing))
                         {
                             await message.Channel.SendMessageAsync(predictedPokemon.FollowUpMessageOnRarePing);
                         }
-
-                        messageSendStopwatch.Stop();
-
-                        var predictionStatsMessage = LogMessageBuilder.TimeStatisticsMessageBuilder("Pokemon prediction took", predictionStopwatch.ElapsedMilliseconds, predictionStopwatch.ElapsedTicks);
-                        var discordMessageStatsMessage = LogMessageBuilder.TimeStatisticsMessageBuilder("Pokemon prediction message send took", messageSendStopwatch.ElapsedMilliseconds, messageSendStopwatch.ElapsedTicks);
-                        await _logger.DiscrodChannelLogger(predictionStatsMessage, Constants.GuildId, Constants.BotLogsChannel).ConfigureAwait(false);
-                        await _logger.DiscrodChannelLogger(discordMessageStatsMessage, Constants.GuildId, Constants.BotLogsChannel).ConfigureAwait(false);
                     }
                 }
                 else
