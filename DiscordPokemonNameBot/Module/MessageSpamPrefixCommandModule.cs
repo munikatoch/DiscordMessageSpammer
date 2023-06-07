@@ -7,6 +7,7 @@ using Interfaces.Logger;
 using Models;
 using Models.Discord;
 using Models.Discord.Common;
+using System.IO.Compression;
 
 namespace DiscordPokemonNameBot.Module
 {
@@ -175,22 +176,18 @@ namespace DiscordPokemonNameBot.Module
         {
             _logger.CommandUsedLog(_folderName, "getlogs", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
 
-            await Context.Message.ReplyAsync("Here are all the files");
+            await Context.Message.ReplyAsync("Here are the logs");
             await Task.Run(async () =>
             {
-                IEnumerable<string> files = FileUtils.GetAllFilesInDirectory(Constants.Logfolder);
-
-                List<FileAttachment> attachments = new List<FileAttachment>();
-
-                foreach (string file in files)
+                try
                 {
-                    if (string.IsNullOrEmpty(folder) || (!string.IsNullOrEmpty(folder) && file.Contains(folder)))
-                    {
-                        attachments.Add(new FileAttachment(file, description: Path.GetFullPath(file)));
-                    }
+                    ZipFile.CreateFromDirectory(Constants.Logfolder, Constants.LogZipfolder, CompressionLevel.Optimal, true);
+                    await Context.Channel.SendFileAsync(Constants.LogZipfolder);
                 }
-                await Context.Channel.SendFilesAsync(attachments);
-
+                catch(Exception e)
+                {
+                    await _logger.DiscrodChannelLogger(e.Message, Constants.GuildId, Constants.BotLogsChannel);
+                }
             }).ConfigureAwait(false);
         }
     }
