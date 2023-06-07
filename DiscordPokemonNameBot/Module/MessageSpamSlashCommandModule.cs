@@ -184,8 +184,8 @@ namespace DiscordPokemonNameBot.Module
                 try
                 {
                     FileUtils.CreateDirectoryIfNotExists(Constants.LogZipfolder);
-                    ZipFile.CreateFromDirectory(Constants.Logfolder, Constants.LogZipfolder, CompressionLevel.Optimal, true);
-                    await Context.Channel.SendFileAsync(Constants.LogZipfolder);
+                    ZipFile.CreateFromDirectory(Constants.Logfolder, Constants.LogZipfile, CompressionLevel.Optimal, true);
+                    await Context.Channel.SendFileAsync(Constants.LogZipfile);
                 }
                 catch (Exception e)
                 {

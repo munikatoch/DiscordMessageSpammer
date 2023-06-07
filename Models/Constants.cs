@@ -31,7 +31,8 @@
         #region Logs
 
         public static readonly string Logfolder = Path.Combine(ProjectRootDirectory, "Log");
-        public static readonly string LogZipfolder = Path.Combine(ProjectRootDirectory, "Zip", "logs.zip");
+        public static readonly string LogZipfolder = Path.Combine(ProjectRootDirectory, "Zip");
+        public static readonly string LogZipfile = Path.Combine(LogZipfolder, "logs.zip");
         public static readonly string EOFMarkup = "-------------------------------------------------------------------------------------------------------------------------------------------------";
 
         #endregion
