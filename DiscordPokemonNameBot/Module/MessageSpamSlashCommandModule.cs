@@ -183,12 +183,17 @@ namespace DiscordPokemonNameBot.Module
             {
                 try
                 {
+                    FileUtils.CreateDirectoryIfNotExists(Constants.LogZipfolder);
                     ZipFile.CreateFromDirectory(Constants.Logfolder, Constants.LogZipfolder, CompressionLevel.Optimal, true);
                     await Context.Channel.SendFileAsync(Constants.LogZipfolder);
                 }
                 catch (Exception e)
                 {
                     await _logger.DiscrodChannelLogger(e.Message, Constants.GuildId, Constants.BotLogsChannel);
+                }
+                finally
+                {
+                    FileUtils.DeleteAllFiles(Constants.LogZipfolder);
                 }
 
             }).ConfigureAwait(false);
