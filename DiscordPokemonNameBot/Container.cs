@@ -84,6 +84,15 @@ namespace DiscordPokemonNameBot
             collection.AddScoped<IAppLogger, AppLogger>();
             collection.AddSingleton<DiscordShardedClient>();
 
+            using var logger = new LoggerConfiguration().WriteTo.File(
+                Models.Constants.Logfile,
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 3)
+                .Enrich.WithExceptionDetails()
+                .CreateLogger();
+
+            collection.AddSingleton<ILogger>(logger);
+
             return collection.BuildServiceProvider();
         }
 

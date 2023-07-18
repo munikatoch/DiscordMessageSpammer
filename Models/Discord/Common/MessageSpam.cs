@@ -10,7 +10,7 @@ namespace Models.Discord.Common
     {
         public string? Message { get; set; }
         public bool IsSpamMessageEnabled { get; set; }
-        public bool IsGenerateRandomDurationEnabled { get; set; }
         public TimeSpan DurationInSeconds { get; set; }
+        public ulong DiscordChannelId { get; set; }
     }
 }

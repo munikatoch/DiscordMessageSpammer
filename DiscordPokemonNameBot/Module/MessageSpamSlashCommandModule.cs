@@ -96,6 +96,7 @@ namespace DiscordPokemonNameBot.Module
             }
             else if (duration == 0)
             {
+                duration = _random.Next(5, 15);
                 await RespondAsync("Message will spam at a range of 5s to 15s per message as duration was default or 0");
             }
             else if (duration < 5)
@@ -107,10 +108,8 @@ namespace DiscordPokemonNameBot.Module
             {
                 await RespondAsync($"Message spam at {duration}s per message");
             }
-            _message.IsGenerateRandomDurationEnabled = duration == 0;
             _message.DurationInSeconds = TimeSpan.FromSeconds(duration);
-            _message.IsGenerateRandomDurationEnabled = duration == 0;
-            _message.DurationInSeconds = TimeSpan.FromSeconds(duration);
+            _message.DiscordChannelId = channel.Id;
             if (!_message.IsSpamMessageEnabled)
             {
                 _message.IsSpamMessageEnabled = true;
@@ -118,13 +117,8 @@ namespace DiscordPokemonNameBot.Module
                 {
                     while (_message.IsSpamMessageEnabled)
                     {
-                        if (_message.IsGenerateRandomDurationEnabled)
-                        {
-                            duration = _random.Next(5, 15);
-                            _message.DurationInSeconds = TimeSpan.FromSeconds(duration);
-                        }
                         await Task.Delay(_message.DurationInSeconds);
-                        await _discordService.CreateAndSendSpamMessage(channel.Id);
+                        await _discordService.CreateAndSendSpamMessage(_message.DiscordChannelId);
                     }
                 });
             }
