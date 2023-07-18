@@ -93,34 +93,31 @@ namespace DiscordPokemonNameBot.Module
             else if (duration == 0)
             {
                 duration = _random.Next(5, 15);
-                await Context.Message.ReplyAsync("Message will spam at a range of 5s to 15s per message as duration was default or 0");
+                await Context.Message.ReplyAsync($"Message will spam at {duration}s per message in channel {channel.Id} as duration was default or 0");
             }
             else if (duration < 5)
             {
-                await Context.Message.ReplyAsync("Message will spam at 5s per message as this is the minimum");
+                await Context.Message.ReplyAsync($"Message will spam at 5s per message as this is the minimum in channel {channel.Id}");
                 duration = 5;
-            }
-            else
-            {
-                await Context.Message.ReplyAsync($"Message spam at {duration}s per message");
             }
             _message.DurationInSeconds = TimeSpan.FromSeconds(duration);
             _message.DiscordChannelId = channel.Id;
             if (!_message.IsSpamMessageEnabled)
             {
+                await Context.Message.ReplyAsync($"Message spam at {duration}s per message in channel {channel.Id}");
                 _message.IsSpamMessageEnabled = true;
                 _ = Task.Run(async () =>
                 {
                     while (_message.IsSpamMessageEnabled)
                     {
                         await Task.Delay(_message.DurationInSeconds);
-                        await _discordService.CreateAndSendSpamMessage(channel.Id);
+                        await _discordService.CreateAndSendSpamMessage(_message.DiscordChannelId);
                     }
                 });
             }
             else
             {
-                await Context.Message.ReplyAsync("Message spam updated");
+                await Context.Message.ReplyAsync($"Message spam updated to {duration}s per message in channel {channel.Id}");
             }
         }
 
