@@ -97,18 +97,18 @@ namespace DiscordPokemonNameBot.Module
             else if (duration == 0)
             {
                 duration = _random.Next(5, 15);
-                await RespondAsync($"Message will spam at {duration}s per message in channel {channel.Id} as duration was default or 0");
+                await RespondAsync($"Message will spam at {duration}s per message in channel <#{channel.Id}> as duration was default or 0");
             }
             else if (duration < 5)
             {
-                await RespondAsync($"Message will spam at 5s per message as this is the minimum in channel {channel.Id}");
+                await RespondAsync($"Message will spam at 5s per message as this is the minimum in channel <#{channel.Id}>");
                 duration = 5;
             }
             _message.DurationInSeconds = TimeSpan.FromSeconds(duration);
             _message.DiscordChannelId = channel.Id;
             if (!_message.IsSpamMessageEnabled)
             {
-                await RespondAsync($"Message spam at {duration}s per message in channel {channel.Id}");
+                await RespondAsync($"Message spam at {duration}s per message in channel <#{channel.Id}>");
                 _message.IsSpamMessageEnabled = true;
                 _ = Task.Run(async () =>
                 {
