@@ -119,7 +119,7 @@ namespace DiscordPokemonNameBot
             #endregion
 
             #region Discord Package
-            
+
             collection.AddSingleton<DiscordShardedClient>();
             collection.AddSingleton<CommandService>();
             collection.AddSingleton<InteractionService>();
@@ -172,9 +172,9 @@ namespace DiscordPokemonNameBot
             #endregion
 
             using var logger = new LoggerConfiguration().WriteTo.File(
-                Models.Constants.Logfile, 
-                rollingInterval: RollingInterval.Day, 
-                retainedFileCountLimit: 7)
+                Models.Constants.Logfile,
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 3)
                 .Enrich.WithExceptionDetails()
                 .CreateLogger();
 
