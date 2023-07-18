@@ -3,7 +3,7 @@
     public class Constants
     {
         #region Bot Version
-        public static readonly string BotVersion = "1.5";
+        public static readonly string BotVersion = "1.7";
         #endregion
 
 
@@ -33,7 +33,7 @@
         public static readonly string Logfolder = Path.Combine(ProjectRootDirectory, "Log");
         public static readonly string LogZipfolder = Path.Combine(ProjectRootDirectory, "Zip");
         public static readonly string LogZipfile = Path.Combine(LogZipfolder, "logs.zip");
-        public static readonly string EOFMarkup = "-------------------------------------------------------------------------------------------------------------------------------------------------";
+        public static readonly string Logfile = Path.Combine(Logfolder, "log.txt");
 
         #endregion
 

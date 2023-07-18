@@ -33,11 +33,9 @@ namespace DiscordPokemonNameBot.Handler.InteractionHandler
             _client.SlashCommandExecuted += SlashCommandExecutedEvent;
         }
 
-        private Task LogInteractionServiceEvent(LogMessage log)
+        private async Task LogInteractionServiceEvent(LogMessage log)
         {
-            string message = LogMessageBuilder.DiscordLogMessage(log);
-            _logger.FileLogger("InteractionService", message);
-            return Task.CompletedTask;
+            await _logger.FileLogger(log).ConfigureAwait(false);
         }
 
         private async Task SlashCommandExecutedEvent(SocketSlashCommand command)
@@ -46,14 +44,7 @@ namespace DiscordPokemonNameBot.Handler.InteractionHandler
             IResult result = await _interactionService.ExecuteCommandAsync(context, _serviceProvider);
             if (!result.IsSuccess)
             {
-                StringBuilder sb = new StringBuilder();
-                if (result.Error.HasValue)
-                {
-                    sb.AppendLine($"Error: {result.Error}");
-                }
-                sb.AppendLine(result.ErrorReason);
-                sb.AppendLine(Constants.EOFMarkup);
-                _logger.FileLogger("InteractionCommand/Unsuccessful", sb.ToString());
+                await _logger.FileLogger(result).ConfigureAwait(false);
                 await command.RespondAsync(result.ErrorReason);
             }
         }

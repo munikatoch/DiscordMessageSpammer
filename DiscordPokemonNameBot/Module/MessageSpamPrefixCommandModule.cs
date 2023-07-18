@@ -18,7 +18,6 @@ namespace DiscordPokemonNameBot.Module
         private readonly MessageSpam _message;
         private readonly IDiscordService _discordService;
         private readonly IPokemonService _pokemonService;
-        private readonly string _folderName = "PrefixCommand/Successful";
 
         public MessageSpamPrefixCommandModule(Random random, IAppLogger appLogger, MessageSpam message, IDiscordService discordService, IPokemonService pokemonService)
         {
@@ -34,7 +33,7 @@ namespace DiscordPokemonNameBot.Module
         public async Task BotVersionn()
         {
             await Context.Message.ReplyAsync("Bot version: " + Constants.BotVersion);
-            _logger.CommandUsedLog(_folderName, "version", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
+            _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "version", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
         }
 
         [Command("hello")]
@@ -42,14 +41,14 @@ namespace DiscordPokemonNameBot.Module
         public async Task Ping()
         {
             await Context.Message.ReplyAsync("Hello " + Context.User.Mention + ". I am a bot and current bot latency is " + Context.Client.Latency + " ms");
-            _logger.CommandUsedLog(_folderName, "hello", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
+            _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "hello", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
         }
 
         [Command("delete")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task DeleteMessages(int count)
         {
-            _logger.CommandUsedLog(_folderName, "delete", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
+            _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "delete", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
 
             if (count < 0)
             {
@@ -82,7 +81,7 @@ namespace DiscordPokemonNameBot.Module
         [RequireBotPermission(ChannelPermission.SendMessages)]
         public async Task StartMessageSpam(SocketChannel channel, int duration = 0)
         {
-            _logger.CommandUsedLog(_folderName, "startspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
+            _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "startspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
 
             FileUtils.DeleteAllLogFilesOlderThanTime(TimeSpan.FromDays(7)); //Temporary solution to delete old log files
 
@@ -134,14 +133,14 @@ namespace DiscordPokemonNameBot.Module
         {
             _message.IsSpamMessageEnabled = false;
             await Context.Message.ReplyAsync("Message spam stopped");
-            _logger.CommandUsedLog(_folderName, "stopspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
+            _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "stopspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
         }
 
         [Command("deleteall")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
         public async Task DeleteAllMessagesFromChannel()
         {
-            _logger.CommandUsedLog(_folderName, "deleteall", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
+            _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "deleteall", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
 
             await Context.Message.ReplyAsync("Message getting deleted");
             _ = Task.Run(async () =>
@@ -161,7 +160,7 @@ namespace DiscordPokemonNameBot.Module
         [RequireBotPermission(ChannelPermission.SendMessages)]
         public async Task DetectPokemon(string url)
         {
-            _logger.CommandUsedLog(_folderName, "detectpokemon", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
+            _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "detectpokemon", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
 
             await Task.Run(async () =>
             {
@@ -174,7 +173,7 @@ namespace DiscordPokemonNameBot.Module
         [RequireBotPermission(ChannelPermission.AttachFiles)]
         public async Task GetDiscordBotLogs(string folder = "")
         {
-            _logger.CommandUsedLog(_folderName, "getlogs", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
+            _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "getlogs", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
 
             await Context.Message.ReplyAsync("Here are the logs");
             await Task.Run(async () =>

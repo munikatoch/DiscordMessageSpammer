@@ -2,22 +2,31 @@
 using Discord.WebSocket;
 using Interfaces.Logger;
 using Models;
+using Newtonsoft.Json;
+using Serilog;
 
 namespace Logging
 {
     public class AppLogger : IAppLogger
     {
         private readonly DiscordShardedClient _client;
+        private readonly ILogger _logger;
 
-        public AppLogger(DiscordShardedClient client) 
+        public AppLogger(DiscordShardedClient client, ILogger logger) 
         {
             _client = client;
+            _logger = logger;
         }
 
-        public void CommandUsedLog(string folder, string command, ulong channelId, ulong userId, ulong guildId)
+        public void CommandUsedLog(string source, string command, ulong channelId, ulong userId, ulong guildId)
         {
-            string commandLogMessage = $"GuildId: {guildId} || ChannelId: {channelId} || UserId: {userId} || Command Used: {command}";
-            FileLogger(folder, commandLogMessage);
+            FileLogger(new { 
+                Source =  source,
+                CommandUsed = command,
+                DiscordGuildId = guildId,
+                DiscordChannelId = channelId,
+                DiscordUserId = userId,
+            });
         }
 
         public void ConsoleLogger(string message, ConsoleColor color = ConsoleColor.Gray)
@@ -44,37 +53,17 @@ namespace Logging
             return Task.CompletedTask;
         }
 
-        public void ExceptionLog(string folder, Exception exception)
+        public Task ExceptionLog(string source, Exception exception)
         {
-            var filePath = $"{Constants.Logfolder}/Exception/{folder}";
-            FileUtils.CreateDirectoryIfNotExists(filePath);
-
-            filePath += $"/{DateTime.UtcNow:yyyy-MM-dd}.txt";
-            using (var file = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None))
-            {
-                using (var sw = new StreamWriter(file))
-                {
-                    string fileContent = LogMessageBuilder.ExceptionMessageBuilder(exception);
-                    sw.WriteLine(fileContent);
-                    sw.WriteLine(Constants.EOFMarkup);
-                }
-            }
+            _logger.Error(exception, source);
+            return Task.CompletedTask;
         }
 
-        public void FileLogger(string folder, string message)
+        public Task FileLogger(object message)
         {
-            var filePath = $"{Constants.Logfolder}/{folder}";
-            FileUtils.CreateDirectoryIfNotExists(filePath);
-
-            filePath += $"/{DateTime.UtcNow:yyyy-MM-dd}.txt";
-            using (var file = new FileStream(filePath, FileMode.Append, FileAccess.Write, FileShare.None))
-            {
-                using (var sw = new StreamWriter(file))
-                {
-                    sw.WriteLine($"{DateTime.UtcNow:T} : Message : {message}");
-                    sw.WriteLine(Constants.EOFMarkup);
-                }
-            }
+            string jsonLogMessage = JsonConvert.SerializeObject(message);
+            _logger.Information(jsonLogMessage);
+            return Task.CompletedTask;
         }
     }
 }

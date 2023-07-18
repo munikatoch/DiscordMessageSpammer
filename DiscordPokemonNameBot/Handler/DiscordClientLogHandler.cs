@@ -47,8 +47,8 @@ namespace DiscordPokemonNameBot.Handler
         {
             StringBuilder message = new StringBuilder();
             message.AppendLine($"ShardId: {client.ShardId} is Connected, Latency: {client.Latency}ms");
-            message.AppendLine(LogMessageBuilder.ExceptionMessageBuilder(exception));
-            await _logger.DiscrodChannelLogger(message.ToString(), Constants.GuildId, Constants.BotShardDisconnectedChannel);
+            await _logger.DiscrodChannelLogger(message.ToString(), Constants.GuildId, Constants.BotShardDisconnectedChannel).ConfigureAwait(false);
+            await _logger.ExceptionLog("DiscordClientLogHandler", exception).ConfigureAwait(false);
         }
 
         private async Task ShardConnectedEvent(DiscordSocketClient client)
@@ -70,14 +70,13 @@ namespace DiscordPokemonNameBot.Handler
 
         private Task LogEvent(LogMessage log)
         {
-            string message = LogMessageBuilder.DiscordLogMessage(log);
             if(log.Exception != null) 
             {
-                _logger.ExceptionLog("Discord", log.Exception);
+                _logger.ExceptionLog("DiscordClientLogHandler", log.Exception).ConfigureAwait(false);
             }
             else
             {
-                _logger.FileLogger("Discord", message);
+                _logger.FileLogger(log).ConfigureAwait(false);
             }
             return Task.CompletedTask;
         }

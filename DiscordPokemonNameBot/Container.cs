@@ -25,7 +25,8 @@ using DiscordPokemonNameBot.Service;
 using Models.Discord.Common;
 using Interfaces.Discord.Helper;
 using DiscordPokemonNameBot.Helper;
-using DiscordPokemonNameBot.Module;
+using Serilog;
+using Serilog.Exceptions;
 
 namespace DiscordPokemonNameBot
 {
@@ -45,7 +46,7 @@ namespace DiscordPokemonNameBot
         }
 
 
-        public static IServiceProvider? _discordBotServiceProvider;
+        private static IServiceProvider? _discordBotServiceProvider;
         public static IServiceProvider DiscordBotServiceProvider
         {
             get
@@ -142,19 +143,42 @@ namespace DiscordPokemonNameBot
 
             #region Pokemon Prediction
 
-            collection.AddPredictionEnginePool<ModelInput, ModelOutput>().FromFile(Constants.MlModelFileOutputPath);
+            collection.AddPredictionEnginePool<ModelInput, ModelOutput>().FromFile(Models.Constants.MlModelFileOutputPath);
             #endregion
 
             #region Http Client
 
-            collection.AddHttpClient(HttpClientType.RandomParagraph.ToString());
-            collection.AddHttpClient(HttpClientType.RandomJoke.ToString());
-            collection.AddHttpClient(HttpClientType.RandomQuote.ToString());
-            collection.AddHttpClient(HttpClientType.Pokemon.ToString());
-            collection.AddHttpClient(HttpClientType.Discord.ToString());
+            collection.AddHttpClient(HttpClientType.RandomParagraph.ToString(), x =>
+            {
+                x.Timeout = TimeSpan.FromSeconds(3);
+            });
+            collection.AddHttpClient(HttpClientType.RandomJoke.ToString(), x =>
+            {
+                x.Timeout = TimeSpan.FromSeconds(3);
+            });
+            collection.AddHttpClient(HttpClientType.RandomQuote.ToString(), x =>
+            {
+                x.Timeout = TimeSpan.FromSeconds(3);
+            });
+            collection.AddHttpClient(HttpClientType.Pokemon.ToString(), x =>
+            {
+                x.Timeout = TimeSpan.FromSeconds(3);
+            });
+            collection.AddHttpClient(HttpClientType.Discord.ToString(), x =>
+            {
+                x.Timeout = TimeSpan.FromSeconds(3);
+            });
 
             #endregion
 
+            using var logger = new LoggerConfiguration().WriteTo.File(
+                Models.Constants.Logfile, 
+                rollingInterval: RollingInterval.Day, 
+                retainedFileCountLimit: 7)
+                .Enrich.WithExceptionDetails()
+                .CreateLogger();
+
+            collection.AddSingleton<ILogger>(logger);
             collection.AddScoped<IAppLogger, AppLogger>();
             return collection.BuildServiceProvider();
         }

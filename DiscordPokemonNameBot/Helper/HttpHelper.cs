@@ -10,8 +10,8 @@ namespace DiscordPokemonNameBot.Helper
 {
     public class HttpHelper : IHttpHelper
     {
-        private IHttpClientFactory _clientFactory;
-        private IAppLogger _appLogger;
+        private readonly IHttpClientFactory _clientFactory;
+        private readonly IAppLogger _appLogger;
 
         public HttpHelper(IHttpClientFactory clientFactory, IAppLogger appLogger)
         {
@@ -21,43 +21,37 @@ namespace DiscordPokemonNameBot.Helper
 
         public async Task<byte[]?> GetImageContent(string url, string type)
         {
-            byte[]? content = new byte[0];
+            byte[]? content = Array.Empty<byte>();
 
             if (ValidateAndParseUrl(url, out Uri? uri))
             {
                 try
                 {
-                    using (HttpClient client = _clientFactory.CreateClient(type))
+                    using HttpClient client = _clientFactory.CreateClient(type);
+                    using HttpResponseMessage response = await client.GetAsync(uri);
+                    if (response.IsSuccessStatusCode)
                     {
-                        using (HttpResponseMessage response = await client.GetAsync(uri))
+                        if (response.Content.Headers.ContentType != null)
                         {
-                            if (response.IsSuccessStatusCode)
+                            string contentType = response.Content.Headers.ContentType.ToString();
+                            if (contentType.StartsWith("image"))
                             {
-                                if(response.Content.Headers.ContentType != null)
-                                {
-                                    string contentType = response.Content.Headers.ContentType.ToString();
-                                    if (contentType.StartsWith("image")) 
-                                    {
-                                        content = await response.Content.ReadAsByteArrayAsync();
-                                    }
-                                }
-                                else
-                                {
-                                    string message = $"{url} is not a image url";
-                                    _appLogger.FileLogger("Http/Unsuccess", message);
-                                }
-                            }
-                            else
-                            {
-                                string message = await LogMessageBuilder.CreateHttpUnsuccessLogMessage(response);
-                                _appLogger.FileLogger("Http/Unsuccess", message);
+                                content = await response.Content.ReadAsByteArrayAsync();
                             }
                         }
+                        else
+                        {
+                            await _appLogger.FileLogger(response).ConfigureAwait(false);
+                        }
+                    }
+                    else
+                    {
+                        await _appLogger.FileLogger(response).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _appLogger.ExceptionLog("Http", ex);
+                    await _appLogger.ExceptionLog("HttpHelper: GetImageContent", ex).ConfigureAwait(false);
                 }
             }
             return content;
@@ -71,25 +65,20 @@ namespace DiscordPokemonNameBot.Helper
                 FormUrlEncodedContent content = new FormUrlEncodedContent(contentKeyValuePair);
                 try
                 {
-                    using (HttpClient client = _clientFactory.CreateClient(type))
+                    using HttpClient client = _clientFactory.CreateClient(type);
+                    if (header != null && header.Count > 0)
                     {
-                        if (header != null && header.Count > 0)
-                        {
-                            AddOrUpdateHeader(client, header);
-                        }
-                        using (HttpResponseMessage response = await client.PostAsync(uri, content))
-                        {
-                            if (!response.IsSuccessStatusCode)
-                            {
-                                string message = await LogMessageBuilder.CreateHttpUnsuccessLogMessage(response);
-                                _appLogger.FileLogger("Http/Unsuccess", message);
-                            }
-                        }
+                        AddOrUpdateHeader(client, header);
+                    }
+                    using HttpResponseMessage response = await client.PostAsync(uri, content);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        await _appLogger.FileLogger(response).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _appLogger.ExceptionLog("Http", ex);
+                    await _appLogger.ExceptionLog("HttpHelper: FormUrlEcodedContentPostRequest", ex).ConfigureAwait(false);
                 }
             }
         }
@@ -101,45 +90,40 @@ namespace DiscordPokemonNameBot.Helper
             {
                 try
                 {
-                    using (HttpClient client = _clientFactory.CreateClient(type))
+                    using HttpClient client = _clientFactory.CreateClient(type);
+                    using HttpResponseMessage response = await client.GetAsync(uri);
+                    if (response.IsSuccessStatusCode)
                     {
-                        using (HttpResponseMessage response = await client.GetAsync(uri))
+                        string data = await response.Content.ReadAsStringAsync();
+
+
+                        if (TypeUtil.IsJson(data))
                         {
-                            if (response.IsSuccessStatusCode)
+                            result = JsonSerializer.Deserialize<T>(data, new JsonSerializerOptions()
                             {
-                                string data = await response.Content.ReadAsStringAsync();
-
-
-                                if (TypeUtil.IsJson(data))
-                                {
-                                    result = JsonSerializer.Deserialize<T>(data, new JsonSerializerOptions()
-                                    {
-                                        PropertyNameCaseInsensitive = true
-                                    });
-                                    return result;
-                                }
-                                else
-                                {
-                                    return (T)Convert.ChangeType(data, typeof(T));
-                                }
-                            }
-                            else
-                            {
-                                string message = await LogMessageBuilder.CreateHttpUnsuccessLogMessage(response);
-                                _appLogger.FileLogger("Http/Unsuccess", message);
-                            }
+                                PropertyNameCaseInsensitive = true
+                            });
+                            return result;
                         }
+                        else
+                        {
+                            return (T)Convert.ChangeType(data, typeof(T));
+                        }
+                    }
+                    else
+                    {
+                        await _appLogger.FileLogger(response).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
                 {
-                    _appLogger.ExceptionLog("Http", ex);
+                    await _appLogger.ExceptionLog("HttpHelper: GetRequest", ex).ConfigureAwait(false);
                 }
             }
-            return default(T);
+            return default;
         }
 
-        private void AddOrUpdateHeader(HttpClient client, Dictionary<string, string> header)
+        private static void AddOrUpdateHeader(HttpClient client, Dictionary<string, string> header)
         {
             foreach (KeyValuePair<string, string> keyValuePair in header)
             {
@@ -151,7 +135,7 @@ namespace DiscordPokemonNameBot.Helper
             }
         }
 
-        private bool ValidateAndParseUrl(string url, out Uri? uri)
+        private static bool ValidateAndParseUrl(string url, out Uri? uri)
         {
             return Uri.TryCreate(url, UriKind.Absolute, out uri) && uri != null && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
         }

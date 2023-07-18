@@ -84,13 +84,7 @@ namespace DiscordPokemonNameBot.Handler.PrefixHandler
                         IResult result = await _commandService.ExecuteAsync(context, argPos, _serviceProvider);
                         if (!result.IsSuccess)
                         {
-                            StringBuilder sb = new StringBuilder();
-                            if (result.Error.HasValue)
-                            {
-                                sb.AppendLine($"Error: {result.Error}");
-                            }
-                            sb.AppendLine(result.ErrorReason);
-                            _logger.FileLogger("PrefixCommand/Unsuccessful", sb.ToString());
+                            await _logger.FileLogger(result).ConfigureAwait(false);
                             await message.ReplyAsync(result.ErrorReason);
                         }
                     }
@@ -99,11 +93,9 @@ namespace DiscordPokemonNameBot.Handler.PrefixHandler
 
         }
 
-        private Task LogCommandServiceEvent(LogMessage log)
+        private async Task LogCommandServiceEvent(LogMessage log)
         {
-            string message = LogMessageBuilder.DiscordLogMessage(log);
-            _logger.FileLogger("CommandService", message);
-            return Task.CompletedTask;
+            await _logger.FileLogger(log).ConfigureAwait(false);
         }
     }
 }

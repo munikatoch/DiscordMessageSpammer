@@ -9,9 +9,9 @@ namespace Interfaces.Logger
     public interface IAppLogger
     {
         void ConsoleLogger(string message, ConsoleColor color = ConsoleColor.Gray);
-        void FileLogger(string folder, string message);
         Task DiscrodChannelLogger(string message, ulong guildId, ulong channelId);
-        void ExceptionLog(string folder, Exception exception);
-        void CommandUsedLog(string folder, string command, ulong channelId, ulong userId, ulong guildId);
+        Task ExceptionLog(string source, Exception exception);
+        void CommandUsedLog(string source, string command, ulong channelId, ulong userId, ulong guildId);
+        Task FileLogger(object message);
     }
 }
