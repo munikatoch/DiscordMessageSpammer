@@ -121,7 +121,7 @@ namespace DiscordPokemonNameBot.Module
             }
             else
             {
-                await RespondAsync($"Message spam updated to {duration}s per message in channel {channel.Id}");
+                await RespondAsync($"Message spam updated to {duration}s per message in channel <#{channel.Id}>");
             }
         }
 
