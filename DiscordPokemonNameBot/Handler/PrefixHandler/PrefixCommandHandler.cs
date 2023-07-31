@@ -1,21 +1,11 @@
-﻿using Common;
-using Discord;
+﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using DiscordPokemonNameBot.Module;
 using Interfaces.Discord.Handler.PrefixHandler;
 using Interfaces.Discord.Service;
 using Interfaces.Logger;
-using Models;
 using Models.Discord;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Channels;
-using System.Threading.Tasks;
-using Tensorflow.Contexts;
 
 namespace DiscordPokemonNameBot.Handler.PrefixHandler
 {
@@ -73,6 +63,7 @@ namespace DiscordPokemonNameBot.Handler.PrefixHandler
                         {
                             await message.Channel.SendMessageAsync(predictedPokemon.FollowUpMessageOnRarePing);
                         }
+                        await _logger.FileLogger(new { predictedPokemon.PokemonEmbed }).ConfigureAwait(false);
                     }
                 }
                 else

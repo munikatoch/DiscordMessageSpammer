@@ -7,7 +7,6 @@ using Discord.WebSocket;
 using Models.Discord;
 using Models;
 using Common;
-using System;
 using System.IO.Compression;
 
 namespace DiscordPokemonNameBot.Module

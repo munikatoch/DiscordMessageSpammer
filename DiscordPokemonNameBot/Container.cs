@@ -12,7 +12,6 @@ using Discord.Commands;
 using Discord.Interactions;
 using Models.MlModelTrainer;
 using Microsoft.Extensions.ML;
-using Models;
 using Interfaces.Discord;
 using Interfaces.Discord.Handler;
 using DiscordPokemonNameBot.Handler;

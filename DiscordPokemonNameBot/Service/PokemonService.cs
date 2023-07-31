@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Interfaces.Discord.Helper;
 using Interfaces.Discord.Service;
+using Interfaces.Logger;
 using Microsoft.Extensions.ML;
 using Microsoft.ML;
 using Models;
@@ -60,14 +61,14 @@ namespace DiscordPokemonNameBot.Service
             {
                 if (pokemonTrait[1].Equals("2")) //Rare Pokemon
                 {
-                    if(Constants.PokemonRarePingRoleId != 0)
+                    if (Constants.PokemonRarePingRoleId != 0)
                         predictedPokemon.RoleTag = $"<@&{Constants.PokemonRarePingRoleId}>";
                     predictedPokemon.FollowUpMessageOnRarePing = "Please start the message spam again to start spawning the pokemons again";
                     _messageSpam.IsSpamMessageEnabled = false;
                 }
                 else if (pokemonTrait[1].Equals("3")) //Shadow Pokemon
                 {
-                    if(Constants.PokemonShadowPingRoleId != 0)
+                    if (Constants.PokemonShadowPingRoleId != 0)
                         predictedPokemon.RoleTag = $"<@&{Constants.PokemonShadowPingRoleId}>";
                 }
             }
