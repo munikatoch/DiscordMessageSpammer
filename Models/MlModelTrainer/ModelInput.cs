@@ -8,7 +8,7 @@ namespace Models.MlModelTrainer
 {
     public class ModelInput
     {
-        public byte[] Image { get; set; }
+        public byte[]? Image { get; set; }
 
         public UInt32 LabelAsKey { get; set; }
     }

@@ -39,14 +39,10 @@
 
         #region
         public static readonly ulong PokemonBotAuthorId = 669228505128501258;
-        public static readonly ulong PokemonRarePingRoleId =  ulong.TryParse(Environment.GetEnvironmentVariable("PokemonRarePingRoleId"), out ulong rarePingId) ? rarePingId : 1045590165747400777;
-        public static readonly ulong PokemonShadowPingRoleId = ulong.TryParse(Environment.GetEnvironmentVariable("PokemonShadowPingRoleId"), out ulong shadowPingId) ? shadowPingId : 1088862418907709530;
-
-        //Below this are all ID of primary server for testing and contact
-        public static readonly ulong GuildId = ulong.TryParse(Environment.GetEnvironmentVariable("GuildId"), out ulong guildId) ? guildId : 1037542119319015424;
-        public static readonly ulong BotLogsChannel = ulong.TryParse(Environment.GetEnvironmentVariable("BotLatencyChannel"), out ulong latencyChannel) ? latencyChannel : 1085965584891662439;
-        public static readonly ulong BotShardConnectedChannel = ulong.TryParse(Environment.GetEnvironmentVariable("BotShardConnectedChannel"), out ulong connectChannel) ? connectChannel : 1085966306853011598;
-        public static readonly ulong BotShardDisconnectedChannel = ulong.TryParse(Environment.GetEnvironmentVariable("BotShardDisconnectedChannel"), out ulong disconnectChannel) ? disconnectChannel : 1085966439409778699;
+        public static readonly ulong GuildId = 1084476576843976754;
+        public static readonly ulong BotLogsChannel = 1098890782930387004;
+        public static readonly ulong BotShardConnectedChannel = 1098890782930387004;
+        public static readonly ulong BotShardDisconnectedChannel = 1098890782930387004;
 
         #endregion
 

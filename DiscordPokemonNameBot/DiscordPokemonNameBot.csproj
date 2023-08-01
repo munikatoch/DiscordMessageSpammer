@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PokemonPredictor\PokemonPredictor.csproj" />
+    <ProjectReference Include="..\Repository\Repository.csproj" />
   </ItemGroup>
 
   <ItemGroup>

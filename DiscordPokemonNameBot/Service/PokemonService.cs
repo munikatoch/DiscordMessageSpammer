@@ -1,37 +1,38 @@
-﻿using Discord;
+﻿using Common;
+using Discord;
+using Google.Protobuf;
+using Interfaces.DAO;
 using Interfaces.Discord.Helper;
 using Interfaces.Discord.Service;
 using Interfaces.Logger;
 using Microsoft.Extensions.ML;
 using Microsoft.ML;
 using Models;
+using Models.DAO;
 using Models.Discord;
 using Models.Discord.Common;
 using Models.MlModelTrainer;
+using Tensorflow.Contexts;
 
 namespace DiscordPokemonNameBot.Service
 {
     public class PokemonService : IPokemonService
     {
         private readonly PredictionEnginePool<ModelInput, ModelOutput> _predictionEnginePool;
-        private readonly MessageSpam _messageSpam;
+        private readonly MessageSpam _message;
         private readonly IHttpHelper _httpHelper;
+        private readonly IPokemonRepository _pokemonRepository;
 
-        public PokemonService(PredictionEnginePool<ModelInput, ModelOutput> predictionEnginePool, MessageSpam messageSpam, IHttpHelper httpHelper)
+        public PokemonService(PredictionEnginePool<ModelInput, ModelOutput> predictionEnginePool, MessageSpam messageSpam, IHttpHelper httpHelper, IPokemonRepository pokemonRepository)
         {
             _predictionEnginePool = predictionEnginePool;
-            _messageSpam = messageSpam;
+            _message = messageSpam;
             _httpHelper = httpHelper;
+            _pokemonRepository = pokemonRepository;
         }
 
-        public async Task<PokemonPrediction> PredictPokemon(string url, bool isPokemonSpawn)
+        public async Task PredictPokemon(string url, ulong? guildId)
         {
-            EmbedBuilder embed = new EmbedBuilder();
-            embed.Title = "Error occured while predicting the pokemon. Please check the input";
-            PokemonPrediction predictedPokemon = new PokemonPrediction()
-            {
-                PokemonEmbed = embed.Build()
-            };
             byte[]? imageContent = await _httpHelper.GetImageContent(url, HttpClientType.Pokemon.ToString());
             if (imageContent != null && imageContent.Length > 0)
             {
@@ -41,42 +42,86 @@ namespace DiscordPokemonNameBot.Service
                     Image = imageContent
                 };
                 ModelOutput prediction = predictionEngine.Predict(imageToPredict);
-                predictedPokemon = BuildPokemonPredictionModel(embed, prediction, isPokemonSpawn);
-                return predictedPokemon;
+                await BuildPokemonPredictionModel(prediction, guildId);
             }
-            return predictedPokemon;
         }
 
-        private PokemonPrediction BuildPokemonPredictionModel(EmbedBuilder embed, ModelOutput prediction, bool isPokemonSpawn)
+        public async Task InsertPokemons()
         {
-            PokemonPrediction predictedPokemon = new PokemonPrediction();
-            string[] pokemonTrait = prediction.PredictedPokemonLabel.Split('|');
+            List<Pokemon> pokemons = new List<Pokemon>();
 
-            embed.Title = "Spawned Pokemon Name !!!";
-            embed.Description = $"Pokemon prediction";
-            embed.AddField("Prediction Accuracy: ", prediction.Score.Max() * 100);
-            embed.AddField("Pokemon Name: ", pokemonTrait[0]);
+            string[] directories = Directory.GetDirectories(Constants.MlModelAssestsInputRelativePath);
 
-            if (pokemonTrait.Length > 1 && isPokemonSpawn)
+            foreach (string directory in directories)
             {
-                if (pokemonTrait[1].Equals("2")) //Rare Pokemon
+                string[] subDirectories = Directory.GetDirectories(directory);
+                foreach (string subDirectory in subDirectories)
                 {
-                    if (Constants.PokemonRarePingRoleId != 0)
-                        predictedPokemon.RoleTag = $"<@&{Constants.PokemonRarePingRoleId}>";
-                    predictedPokemon.FollowUpMessageOnRarePing = "Please start the message spam again to start spawning the pokemons again";
-                    _messageSpam.IsSpamMessageEnabled = false;
-                }
-                else if (pokemonTrait[1].Equals("3")) //Shadow Pokemon
-                {
-                    if (Constants.PokemonShadowPingRoleId != 0)
-                        predictedPokemon.RoleTag = $"<@&{Constants.PokemonShadowPingRoleId}>";
+                    int id = 0;
+                    string? pokemonName = FileUtils.GetAllFilesInDirectory(subDirectory).Where(x => int.TryParse(Path.GetFileNameWithoutExtension(x), out id)).Select(x => Directory.GetParent(x)).FirstOrDefault()?.Name.ToLower();
+
+                    int pokemonType = 1;
+                    if (subDirectory != null)
+                    {
+                        string? superParentName = Directory.GetParent(subDirectory)?.Name;
+                        if (superParentName != null && superParentName.Equals("Rare", StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            pokemonType |= (int)PokemonType.Rare;
+                        }
+                        if (pokemonName != null && pokemonName.StartsWith("shadow"))
+                        {
+                            pokemonType |= (int)PokemonType.Shadow;
+                        }
+                        if (pokemonName != null && (pokemonName.Contains("alolan") || pokemonName.Contains("galarian")))
+                        {
+                            pokemonType |= (int)PokemonType.Regional;
+                        }
+                    }
+
+                    if (pokemonName != null)
+                    {
+                        if (pokemonName.Equals("mime jr", StringComparison.Ordinal))
+                        {
+                            pokemonName = "mime jr.";
+                        }
+                        else if (pokemonName.Equals("type null", StringComparison.Ordinal))
+                        {
+                            pokemonName = "type: null";
+                        }
+                        var pokemon = new Pokemon()
+                        {
+                            IsRare = (pokemonType & (int)PokemonType.Rare) > 0,
+                            IsRegional = (pokemonType & (int)PokemonType.Regional) > 0,
+                            IsShadow = (pokemonType & (int)PokemonType.Shadow) > 0,
+                            PokemonId = id,
+                            PokemonName = pokemonName
+                        };
+                        pokemons.Add(pokemon);
+                    }
                 }
             }
-            embed.WithCurrentTimestamp();
 
-            predictedPokemon.PokemonEmbed = embed.Build();
+            await _pokemonRepository.InsertPokemonAsync(pokemons);
+        }
 
-            return predictedPokemon;
+        private async Task BuildPokemonPredictionModel(ModelOutput prediction, ulong? guildId)
+        {
+            if(guildId.HasValue)
+            {
+                int pokemonId = prediction.PredictedPokemonLabel;
+                Pokemon pokemon = await _pokemonRepository.GetPokemonById(pokemonId);
+                if (pokemon.IsRare) //Rare Pokemon
+                {
+                    var oldValue = _message.SpamDetail[guildId.Value];
+                    var newValue = new SpamDetail()
+                    {
+                        DiscordChannelId = oldValue.DiscordChannelId,
+                        DurationInSeconds = oldValue.DurationInSeconds,
+                        IsSpamMessageEnabled = false
+                    };
+                    _message.SpamDetail.TryUpdate(guildId.Value, newValue, oldValue);
+                }
+            }
         }
     }
 }

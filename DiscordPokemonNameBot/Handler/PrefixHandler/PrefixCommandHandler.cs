@@ -5,6 +5,7 @@ using DiscordPokemonNameBot.Module;
 using Interfaces.Discord.Handler.PrefixHandler;
 using Interfaces.Discord.Service;
 using Interfaces.Logger;
+using Models.DAO;
 using Models.Discord;
 
 namespace DiscordPokemonNameBot.Handler.PrefixHandler
@@ -56,14 +57,11 @@ namespace DiscordPokemonNameBot.Handler.PrefixHandler
                 {
                     if (_prefixService.ValidatePokemonSpanMessage(message, out Embed? embed) && embed != null && embed.Image.HasValue)
                     {
-                        PokemonPrediction predictedPokemon = await _pokemonService.PredictPokemon(embed.Image.Value.Url, true);
-
-                        await message.ReplyAsync(predictedPokemon.RoleTag, false, predictedPokemon.PokemonEmbed);
-                        if(!string.IsNullOrEmpty(predictedPokemon.FollowUpMessageOnRarePing))
+                        if (message.Channel is SocketGuildChannel)
                         {
-                            await message.Channel.SendMessageAsync(predictedPokemon.FollowUpMessageOnRarePing);
+                            SocketGuildChannel? channel = message.Channel as SocketGuildChannel;
+                            await _pokemonService.PredictPokemon(embed.Image.Value.Url, channel?.Guild.Id);
                         }
-                        await _logger.FileLogger(new { predictedPokemon.PokemonEmbed }).ConfigureAwait(false);
                     }
                 }
                 else
@@ -81,7 +79,6 @@ namespace DiscordPokemonNameBot.Handler.PrefixHandler
                     }
                 }
             }
-
         }
 
         private async Task LogCommandServiceEvent(LogMessage log)

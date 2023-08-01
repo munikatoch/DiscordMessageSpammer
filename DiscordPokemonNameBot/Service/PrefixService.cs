@@ -25,7 +25,7 @@ namespace DiscordPokemonNameBot.Service
             {
                 return false;
             }
-            return pokemonEmbed.Title.Equals("A wild pokémon has аppeаred!", StringComparison.InvariantCultureIgnoreCase);
+            return true;//pokemonEmbed.Title.Equals("A wild pokémon has аppeаred!", StringComparison.InvariantCultureIgnoreCase);
         }
     }
 }

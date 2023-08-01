@@ -10,6 +10,6 @@ namespace Models.MlModelTrainer
     {
         public string ImagePath { get; set; }
 
-        public string Label { get; set; }
+        public int Label { get; set; }
     }
 }

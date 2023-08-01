@@ -26,6 +26,9 @@ using Interfaces.Discord.Helper;
 using DiscordPokemonNameBot.Helper;
 using Serilog;
 using Serilog.Exceptions;
+using Interfaces.DAO;
+using Repository;
+using MongoDB.Driver;
 
 namespace DiscordPokemonNameBot
 {
@@ -78,10 +81,19 @@ namespace DiscordPokemonNameBot
         {
             IServiceCollection collection = new ServiceCollection();
 
+            collection.AddSingleton<IAppConfiguration, AppConfiguration>();
+
             collection.AddScoped<IMlModelTrainer, MlModelTrainer>();
             collection.AddScoped(x => new MLContext(seed: 1));
             collection.AddScoped<IAppLogger, AppLogger>();
             collection.AddSingleton<DiscordShardedClient>();
+
+            #region Database
+
+            collection.AddSingleton(x => new MongoClient(x.GetRequiredService<IAppConfiguration>().GetValue("MongoDBConnectionString", string.Empty)));
+            collection.AddScoped<IPokemonRepository, PokemonRepository>();
+            
+            #endregion
 
             using var logger = new LoggerConfiguration().WriteTo.File(
                 Models.Constants.Logfile,
@@ -176,6 +188,13 @@ namespace DiscordPokemonNameBot
             {
                 x.Timeout = TimeSpan.FromSeconds(3);
             });
+
+            #endregion
+
+            #region Database
+
+            collection.AddSingleton(x => new MongoClient(x.GetRequiredService<IAppConfiguration>().GetValue("MongoDBConnectionString", string.Empty)));
+            collection.AddScoped<IPokemonRepository, PokemonRepository>();
 
             #endregion
 

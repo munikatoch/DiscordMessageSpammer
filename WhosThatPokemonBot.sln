@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Models", "Models\Models.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logging", "AppLogger\Logging.csproj", "{0426C623-EF0C-498E-A557-8807DD22005A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{E2AEC371-AEFA-420F-AF88-8BC2A06A0979}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{E2AEC371-AEFA-420F-AF88-8BC2A06A0979}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Repository", "Repository\Repository.csproj", "{326EED53-153F-48E3-86BD-C9305531303C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{E2AEC371-AEFA-420F-AF88-8BC2A06A0979}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E2AEC371-AEFA-420F-AF88-8BC2A06A0979}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E2AEC371-AEFA-420F-AF88-8BC2A06A0979}.Release|Any CPU.Build.0 = Release|Any CPU
+		{326EED53-153F-48E3-86BD-C9305531303C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{326EED53-153F-48E3-86BD-C9305531303C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{326EED53-153F-48E3-86BD-C9305531303C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{326EED53-153F-48E3-86BD-C9305531303C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
