@@ -1,6 +1,7 @@
 ﻿using Models;
 using System;
 using System.Collections.Generic;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -61,6 +62,25 @@ namespace Common
                 if(DateTime.UtcNow.Subtract(creationTime) > timeSpan)
                 {
                     File.Delete(file);
+                }
+            }
+        }
+
+        public static void CreateZipFileSafely()
+        {
+            using (FileStream zipToOpen = new FileStream(Constants.LogZipfile, FileMode.Create))
+            using (ZipArchive archive = new ZipArchive(zipToOpen, ZipArchiveMode.Create))
+            {
+                foreach (var file in Directory.GetFiles(Constants.Logfolder))
+                {
+                    var entryName = Path.GetFileName(file);
+                    var entry = archive.CreateEntry(entryName, CompressionLevel.Optimal);
+                    entry.LastWriteTime = File.GetLastWriteTime(file);
+                    using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    using (var stream = entry.Open())
+                    {
+                        fs.CopyTo(stream);
+                    }
                 }
             }
         }

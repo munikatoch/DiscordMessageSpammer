@@ -24,11 +24,11 @@ namespace DiscordPokemonNameBot.Configuration
         {
             var configurationBuilder = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory);
+            configurationBuilder.AddEnvironmentVariables();
             if (File.Exists("appsettings.json"))
             {
                 configurationBuilder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
             }
-            configurationBuilder.AddEnvironmentVariables();
             IConfigurationRoot configuration = configurationBuilder.Build();
             return configuration;
         }

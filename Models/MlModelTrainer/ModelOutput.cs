@@ -8,8 +8,8 @@ namespace Models.MlModelTrainer
 {
     public class ModelOutput
     {
-        public float[] Score { get; set; }
+        public float[]? Score { get; set; }
 
-        public string PredictedPokemonLabel { get; set; }
+        public int PredictedPokemonLabel { get; set; }
     }
 }

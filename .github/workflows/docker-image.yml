@@ -30,4 +30,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/whos-that-pokemon
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/discord-message-spammer

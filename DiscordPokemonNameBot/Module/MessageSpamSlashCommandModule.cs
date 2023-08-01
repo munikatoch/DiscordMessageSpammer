@@ -4,10 +4,9 @@ using Interfaces.Discord.Service;
 using Interfaces.Logger;
 using Models.Discord.Common;
 using Discord.WebSocket;
-using Models.Discord;
 using Models;
 using Common;
-using System.IO.Compression;
+
 
 namespace DiscordPokemonNameBot.Module
 {
@@ -81,12 +80,10 @@ namespace DiscordPokemonNameBot.Module
         [RequireBotPermission(ChannelPermission.SendMessages)]
         public async Task StartMessageSpam(
             [Summary(description: "Channel for message spamming")] SocketChannel channel,
-            [Summary(description: "Duration in seconds after which message should spam minimum is 5s")] int duration = 0
+            [Summary(description: "Duration in seconds after which message should spam minimum is 3s")] int duration = 0
             )
         {
-            _logger.CommandUsedLog("MessageSpamSlashCommandModule", "startspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
-
-            FileUtils.DeleteAllLogFilesOlderThanTime(TimeSpan.FromDays(7));
+            _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "startspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
 
             if (duration < 0)
             {
@@ -95,26 +92,51 @@ namespace DiscordPokemonNameBot.Module
             }
             else if (duration == 0)
             {
-                duration = _random.Next(5, 15);
+                duration = _random.Next(3, 15);
                 await RespondAsync($"Message will spam at {duration}s per message in channel <#{channel.Id}> as duration was default or 0");
             }
-            else if (duration < 5)
+            else if (duration < 3)
             {
-                await RespondAsync($"Message will spam at 5s per message as this is the minimum in channel <#{channel.Id}>");
-                duration = 5;
+                await RespondAsync($"Message will spam at 3s per message as this is the minimum in channel <#{channel.Id}>");
+                duration = 3;
             }
-            _message.DurationInSeconds = TimeSpan.FromSeconds(duration);
-            _message.DiscordChannelId = channel.Id;
-            if (!_message.IsSpamMessageEnabled)
+            if (!_message.SpamDetail.ContainsKey(Context.Guild.Id))
+            {
+                _message.SpamDetail.TryAdd(Context.Guild.Id, new SpamDetail()
+                {
+                    DiscordChannelId = channel.Id,
+                    DurationInSeconds = TimeSpan.FromSeconds(duration),
+                    IsSpamMessageEnabled = false
+                });
+            }
+            else
+            {
+                var oldValue = _message.SpamDetail[Context.Guild.Id];
+                var newValue = new SpamDetail()
+                {
+                    DiscordChannelId = channel.Id,
+                    DurationInSeconds = TimeSpan.FromSeconds(duration),
+                    IsSpamMessageEnabled = oldValue.IsSpamMessageEnabled
+                };
+                _message.SpamDetail.TryUpdate(Context.Guild.Id, newValue, oldValue);
+            }
+            if (!_message.SpamDetail[Context.Guild.Id].IsSpamMessageEnabled)
             {
                 await RespondAsync($"Message spam at {duration}s per message in channel <#{channel.Id}>");
-                _message.IsSpamMessageEnabled = true;
+                var oldValue = _message.SpamDetail[Context.Guild.Id];
+                var newValue = new SpamDetail()
+                {
+                    DiscordChannelId = channel.Id,
+                    DurationInSeconds = TimeSpan.FromSeconds(duration),
+                    IsSpamMessageEnabled = true
+                };
+                _message.SpamDetail.TryUpdate(Context.Guild.Id, newValue, oldValue);
                 _ = Task.Run(async () =>
                 {
-                    while (_message.IsSpamMessageEnabled)
+                    while (_message.SpamDetail[Context.Guild.Id].IsSpamMessageEnabled)
                     {
-                        await Task.Delay(_message.DurationInSeconds);
-                        await _discordService.CreateAndSendSpamMessage(_message.DiscordChannelId);
+                        await Task.Delay(_message.SpamDetail[Context.Guild.Id].DurationInSeconds);
+                        await _discordService.CreateAndSendSpamMessage(_message.SpamDetail[Context.Guild.Id].DiscordChannelId);
                     }
                 });
             }
@@ -127,7 +149,14 @@ namespace DiscordPokemonNameBot.Module
         [SlashCommand("stopspam", "Stop Message Spamming")]
         public async Task StopMessageSpam()
         {
-            _message.IsSpamMessageEnabled = false;
+            var oldValue = _message.SpamDetail[Context.Guild.Id];
+            var newValue = new SpamDetail()
+            {
+                DiscordChannelId = oldValue.DiscordChannelId,
+                DurationInSeconds = oldValue.DurationInSeconds,
+                IsSpamMessageEnabled = false
+            };
+            _message.SpamDetail.TryUpdate(Context.Guild.Id, newValue, oldValue);
             await RespondAsync("Message spam stopped");
             _logger.CommandUsedLog("MessageSpamSlashCommandModule", "stopspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
         }
@@ -152,22 +181,9 @@ namespace DiscordPokemonNameBot.Module
             });
         }
 
-        [SlashCommand("detectpokemon", "Add url to detect the pokemon")]
-        [RequireBotPermission(ChannelPermission.SendMessages)]
-        public async Task DetectPokemon(string url)
-        {
-            _logger.CommandUsedLog("MessageSpamSlashCommandModule", "detectpokemon", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
-
-            await Task.Run(async () =>
-            {
-                PokemonPrediction predictedPokemon = await _pokemonService.PredictPokemon(url, false);
-                await RespondAsync("", new[] { predictedPokemon.PokemonEmbed });
-            }).ConfigureAwait(false);
-        }
-
         [SlashCommand("getlogs", "Get log files created")]
         [RequireBotPermission(ChannelPermission.AttachFiles)]
-        public async Task GetDiscordBotLogs(string folder = "")
+        public async Task GetDiscordBotLogs()
         {
             _logger.CommandUsedLog("MessageSpamSlashCommandModule", "getlogs", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
 
@@ -177,7 +193,7 @@ namespace DiscordPokemonNameBot.Module
                 try
                 {
                     FileUtils.CreateDirectoryIfNotExists(Constants.LogZipfolder);
-                    ZipFile.CreateFromDirectory(Constants.Logfolder, Constants.LogZipfile, CompressionLevel.Optimal, true);
+                    FileUtils.CreateZipFileSafely();
                     await Context.Channel.SendFileAsync(Constants.LogZipfile);
                 }
                 catch (Exception e)

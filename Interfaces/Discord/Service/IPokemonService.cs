@@ -1,9 +1,12 @@
-﻿using Models.Discord;
+﻿using Models.DAO;
+using Models.Discord;
 
 namespace Interfaces.Discord.Service
 {
     public interface IPokemonService
     {
-        Task<PokemonPrediction> PredictPokemon(string url, bool isPokemonSpawn);
+        Task PredictPokemon(string url, ulong? guildId);
+
+        Task InsertPokemons();
     }
 }

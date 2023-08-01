@@ -1,10 +1,12 @@
 ﻿using Common;
+using Interfaces.DAO;
 using Interfaces.Logger;
 using Interfaces.MlTrainer;
 using Microsoft.ML;
 using Microsoft.ML.Data;
 using Microsoft.ML.Vision;
 using Models;
+using Models.DAO;
 using Models.MlModelTrainer;
 using PokemonPredictor.Common;
 using static Microsoft.ML.DataOperationsCatalog;
@@ -45,11 +47,11 @@ namespace PokemonPredictor
             }
         }
 
-        public string PredictSingle(PredictionEngine<ModelInput, ModelOutput> predictionEngine, byte[]? content = null)
+        public int PredictSingle(PredictionEngine<ModelInput, ModelOutput> predictionEngine, byte[]? content = null)
         {
             if (content == null || content.Length == 0)
             {
-                return string.Empty;
+                return 0;
             }
             ModelInput imageToPredict = new ModelInput
             {
@@ -136,33 +138,13 @@ namespace PokemonPredictor
             IEnumerable<string> files = FileUtils.GetAllFilesInDirectory(folder, new string[] { ".png", ".jpg" });
             foreach (string file in files)
             {
-                string? label = Directory.GetParent(file)?.Name;
                 string? parentPath = Directory.GetParent(file)?.FullName;
-                int pokemonType = 1;
+                int label = 0;
                 if (parentPath != null)
                 {
-                    string? superParentName = Directory.GetParent(parentPath)?.Name;
-                    if (superParentName != null && superParentName.Equals("Rare", StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        pokemonType = 2;
-                    }
-                    else if (label != null && label.StartsWith("Shadow"))
-                    {
-                        pokemonType = 3;
-                    }
+                    FileUtils.GetAllFilesInDirectory(parentPath, new string[] { ".png", ".jpg" }).FirstOrDefault(x => int.TryParse(Path.GetFileNameWithoutExtension(x), out label));
                 }
-                if (label != null)
-                {
-                    if (label.Equals("Mime Jr", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        label = "Mime Jr.";
-                    }
-                    else if (label.Equals("Type Null", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        label = "Type: Null";
-                    }
-                }
-                label = string.Concat(label, "|", pokemonType);
+
                 yield return new ImageData()
                 {
                     ImagePath = file,
