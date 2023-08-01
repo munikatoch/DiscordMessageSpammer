@@ -88,13 +88,6 @@ namespace DiscordPokemonNameBot
             collection.AddScoped<IAppLogger, AppLogger>();
             collection.AddSingleton<DiscordShardedClient>();
 
-            #region Database
-
-            collection.AddSingleton(x => new MongoClient(x.GetRequiredService<IAppConfiguration>().GetValue("MongoDBConnectionString", string.Empty)));
-            collection.AddScoped<IPokemonRepository, PokemonRepository>();
-            
-            #endregion
-
             using var logger = new LoggerConfiguration().WriteTo.File(
                 Models.Constants.Logfile,
                 rollingInterval: RollingInterval.Day,

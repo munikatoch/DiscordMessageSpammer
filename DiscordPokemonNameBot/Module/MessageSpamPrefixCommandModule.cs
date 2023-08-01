@@ -5,10 +5,7 @@ using Discord.WebSocket;
 using Interfaces.Discord.Service;
 using Interfaces.Logger;
 using Models;
-using Models.Discord;
 using Models.Discord.Common;
-using System.Collections.Generic;
-using System.IO.Compression;
 
 namespace DiscordPokemonNameBot.Module
 {

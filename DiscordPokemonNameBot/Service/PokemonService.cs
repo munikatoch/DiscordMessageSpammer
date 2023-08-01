@@ -1,18 +1,13 @@
 ﻿using Common;
-using Discord;
-using Google.Protobuf;
 using Interfaces.DAO;
 using Interfaces.Discord.Helper;
 using Interfaces.Discord.Service;
-using Interfaces.Logger;
 using Microsoft.Extensions.ML;
 using Microsoft.ML;
 using Models;
 using Models.DAO;
-using Models.Discord;
 using Models.Discord.Common;
 using Models.MlModelTrainer;
-using Tensorflow.Contexts;
 
 namespace DiscordPokemonNameBot.Service
 {

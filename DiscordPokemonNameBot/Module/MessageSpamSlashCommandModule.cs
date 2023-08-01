@@ -4,12 +4,9 @@ using Interfaces.Discord.Service;
 using Interfaces.Logger;
 using Models.Discord.Common;
 using Discord.WebSocket;
-using Models.Discord;
 using Models;
 using Common;
-using System.IO.Compression;
-using Google.Protobuf.WellKnownTypes;
-using System.Threading.Channels;
+
 
 namespace DiscordPokemonNameBot.Module
 {
@@ -83,7 +80,7 @@ namespace DiscordPokemonNameBot.Module
         [RequireBotPermission(ChannelPermission.SendMessages)]
         public async Task StartMessageSpam(
             [Summary(description: "Channel for message spamming")] SocketChannel channel,
-            [Summary(description: "Duration in seconds after which message should spam minimum is 2s")] int duration = 0
+            [Summary(description: "Duration in seconds after which message should spam minimum is 3s")] int duration = 0
             )
         {
             _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "startspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);

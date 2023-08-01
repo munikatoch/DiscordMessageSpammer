@@ -17,13 +17,11 @@ namespace PokemonPredictor
     {
         private MLContext _mlContext;
         private IAppLogger _appLoger;
-        private IPokemonRepository _pokemonRepository;
 
-        public MlModelTrainer(MLContext context, IAppLogger appLoger, IPokemonRepository pokemonRepository)
+        public MlModelTrainer(MLContext context, IAppLogger appLoger)
         {
             _mlContext = context;
             _appLoger = appLoger;
-            _pokemonRepository = pokemonRepository;
         }
 
         public void TrainerModel(bool isDeleteWorkspaceAndModel, bool isModelTrainAgain)
@@ -142,41 +140,11 @@ namespace PokemonPredictor
             {
                 string? parentPath = Directory.GetParent(file)?.FullName;
                 int label = 0;
-                string? pokemonName = Directory.GetParent(file)?.Name;
-                int.TryParse(Path.GetFileNameWithoutExtension(file), out int id);
                 if (parentPath != null)
                 {
                     FileUtils.GetAllFilesInDirectory(parentPath, new string[] { ".png", ".jpg" }).FirstOrDefault(x => int.TryParse(Path.GetFileNameWithoutExtension(x), out label));
                 }
-                
-                int pokemonType = 1;
-                if (parentPath != null)
-                {
-                    string? superParentName = Directory.GetParent(parentPath)?.Name;
-                    if (superParentName != null && superParentName.Equals("Rare", StringComparison.CurrentCultureIgnoreCase))
-                    {
-                        pokemonType |= (int)PokemonType.Rare;
-                    }
-                    if (pokemonName != null && pokemonName.StartsWith("Shadow"))
-                    {
-                        pokemonType |= (int)PokemonType.Shadow;
-                    }
-                    if(pokemonName != null && (pokemonName.Contains("Alolan") || pokemonName.Contains("Galarian")))
-                    {
-                        pokemonType |= (int)PokemonType.Regional;
-                    }
-                }
-                if (pokemonName != null)
-                {
-                    if (pokemonName.Equals("Mime Jr", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        pokemonName = "Mime Jr.";
-                    }
-                    else if (pokemonName.Equals("Type Null", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        pokemonName = "Type: Null";
-                    }
-                }
+
                 yield return new ImageData()
                 {
                     ImagePath = file,
