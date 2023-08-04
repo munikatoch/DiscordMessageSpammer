@@ -151,7 +151,8 @@ namespace DiscordPokemonNameBot.Module
             }
             await RespondAsync("Pokemon spawn channels set");
 
-            InitializeSpamMessage(Context.Guild.Id, 0, 0);
+            if (!_message.SpamDetail.ContainsKey(Context.Guild.Id))
+                InitializeSpamMessage(Context.Guild.Id, 0, 0);
 
             SpamDetail oldValue = _message.SpamDetail[Context.Guild.Id];
 
