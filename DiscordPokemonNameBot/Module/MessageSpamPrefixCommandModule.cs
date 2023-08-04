@@ -104,14 +104,7 @@ namespace DiscordPokemonNameBot.Module
             }
             if (!_message.SpamDetail.ContainsKey(Context.Guild.Id))
             {
-                _message.SpamDetail.TryAdd(Context.Guild.Id, new SpamDetail()
-                {
-                    DiscordChannelId = channel.Id,
-                    DurationInSeconds = TimeSpan.FromSeconds(duration),
-                    IsSpamMessageEnabled = false,
-                    CurrentIndex = 0,
-                    PokemonSpawnChannel = new List<ulong>(),
-                });
+                InitializeSpamMessage(Context.Guild.Id, channel.Id, duration);
             }
             if (!_message.SpamDetail[Context.Guild.Id].IsSpamMessageEnabled)
             {
@@ -156,6 +149,8 @@ namespace DiscordPokemonNameBot.Module
 
             await Context.Message.ReplyAsync("Pokemon spawn channels set");
 
+            InitializeSpamMessage(Context.Guild.Id, 0, 0);
+
             SpamDetail oldValue = _message.SpamDetail[Context.Guild.Id];
 
             _message.SpamDetail.TryUpdate(Context.Guild.Id, new SpamDetail()
@@ -173,16 +168,23 @@ namespace DiscordPokemonNameBot.Module
         {
             StringBuilder sb = new StringBuilder();
 
-            SpamDetail oldValue = _message.SpamDetail[Context.Guild.Id];
-
-            if(oldValue.PokemonSpawnChannel.Count > 0)
+            if (_message.SpamDetail.ContainsKey(Context.Guild.Id))
             {
-                foreach (var channel in oldValue.PokemonSpawnChannel)
+                SpamDetail oldValue = _message.SpamDetail[Context.Guild.Id];
+
+                if (oldValue.PokemonSpawnChannel.Count > 0)
                 {
-                    sb.Append($"{MentionUtils.MentionChannel(channel)} ");
+                    foreach (var channel in oldValue.PokemonSpawnChannel)
+                    {
+                        sb.Append($"{MentionUtils.MentionChannel(channel)} ");
+                    }
                 }
             }
-            await Context.Message.ReplyAsync("Pokemon spawn channels:" + sb.ToString());
+            else
+            {
+                sb.Append("No Channel Found!");
+            }
+            await Context.Message.ReplyAsync("Pokemon spawn channels: " + sb.ToString());
         }
 
         [Command("stopspam")]
@@ -249,6 +251,18 @@ namespace DiscordPokemonNameBot.Module
                     FileUtils.DeleteAllFiles(Constants.LogZipfolder);
                 }
             }).ConfigureAwait(false);
+        }
+
+        private void InitializeSpamMessage(ulong id, ulong channelId, int duration)
+        {
+            _message.SpamDetail.TryAdd(Context.Guild.Id, new SpamDetail()
+            {
+                DiscordChannelId = channelId,
+                DurationInSeconds = TimeSpan.FromSeconds(duration),
+                IsSpamMessageEnabled = false,
+                CurrentIndex = 0,
+                PokemonSpawnChannel = new List<ulong>(),
+            });
         }
     }
 }
