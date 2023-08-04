@@ -98,9 +98,9 @@ namespace DiscordPokemonNameBot.Helper
 
                         string contentType = string.Empty;
 
-                        if (response.Content.Headers.ContentType != null)
+                        if (response.Content.Headers.ContentType?.MediaType != null)
                         {
-                            contentType = response.Content.Headers.ContentType.ToString();
+                            contentType = response.Content.Headers.ContentType.MediaType.ToString();
                         }
                         if (contentType.Equals("application/json"))
                         {
