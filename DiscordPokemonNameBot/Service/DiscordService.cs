@@ -129,7 +129,11 @@ namespace DiscordPokemonNameBot.Service
         {
             Dictionary<string, string> headers = new Dictionary<string, string>();
 
-            string userToken = _appConfiguration.GetValue("DiscordUserAuthToken", string.Empty);
+            var totalUsers = _appConfiguration.GetValue($"DiscordUser", 0);
+
+            var authToken = _random.Next(0, 300000) % totalUsers;
+
+            string userToken = _appConfiguration.GetValue($"DiscordUserAuthToken{authToken}", string.Empty);
 
             headers.Add("authorization", userToken);
             return headers;
