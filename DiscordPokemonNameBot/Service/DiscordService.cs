@@ -27,7 +27,7 @@ namespace DiscordPokemonNameBot.Service
 
         public async Task CreateAndSendSpamMessage(ulong id)
         {
-            int type = _random.Next(0, 3);
+            int type = _random.Next(0, 300000) % 5;
             switch (type)
             {
                 case 0:
@@ -55,6 +55,20 @@ namespace DiscordPokemonNameBot.Service
                     {
                         RandomQuoteResponse quoteResponse = quoteResponses.First();
                         _message.Message = $"**Quote**\n{quoteResponse.Quote}\nBy - {quoteResponse.Author}";
+                    }
+                    break;
+                case 3:
+                    RandomUselessFactResponse? randomUselessFact = await _httpHelper.GetRequest<RandomUselessFactResponse>(Constants.RandomUselessFactUrl, HttpClientType.RandomUselessFact.ToString());
+                    if (!string.IsNullOrEmpty(randomUselessFact?.Text))
+                    {
+                        _message.Message = $"Random Useless Fact\n{randomUselessFact.Text}";
+                    }
+                    break;
+                case 4:
+                    RandomActivityResponse? randomActivity = await _httpHelper.GetRequest<RandomActivityResponse>(Constants.RandomActivityUrl, HttpClientType.RandomActivity.ToString());
+                    if (!string.IsNullOrEmpty(randomActivity?.Activity))
+                    {
+                        _message.Message = $"Random activity to do\n{randomActivity.Activity}";
                     }
                     break;
             }
@@ -111,7 +125,7 @@ namespace DiscordPokemonNameBot.Service
             Dictionary<string, string> headers = new Dictionary<string, string>();
 
             string userToken = _appConfiguration.GetValue("DiscordUserAuthToken", string.Empty);
-            
+
             headers.Add("authorization", userToken);
             return headers;
         }

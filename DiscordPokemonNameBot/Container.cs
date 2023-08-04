@@ -181,6 +181,14 @@ namespace DiscordPokemonNameBot
             {
                 x.Timeout = TimeSpan.FromSeconds(3);
             });
+            collection.AddHttpClient(HttpClientType.RandomUselessFact.ToString(), x =>
+            {
+                x.Timeout = TimeSpan.FromSeconds(3);
+            });
+            collection.AddHttpClient(HttpClientType.RandomActivity.ToString(), x =>
+            {
+                x.Timeout = TimeSpan.FromSeconds(3);
+            });
 
             #endregion
 

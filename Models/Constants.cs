@@ -25,6 +25,8 @@
         public static readonly string RandomQuoteUrl = "https://zenquotes.io/api/quote?api=random";
         public static readonly string RandomJokeUrl = "https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,racist,sexist,explicit";
         public static readonly string DiscordMessageSpamUrl = "https://discord.com/api/v9/channels/{0}/messages";
+        public static readonly string RandomUselessFactUrl = "https://uselessfacts.jsph.pl/api/v2/facts/random?language=en";
+        public static readonly string RandomActivityUrl = "https://www.boredapi.com/api/activity/";
 
         #endregion
 

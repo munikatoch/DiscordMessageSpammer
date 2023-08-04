@@ -35,5 +35,10 @@ namespace Models.DAO
         [BsonRepresentation(BsonType.Boolean)]
         [BsonDefaultValue(false)]
         public bool IsRegional { get; set; }
+
+        [BsonElement("spawn_count")]
+        [BsonRepresentation(BsonType.Int64)]
+        [BsonDefaultValue(0L)]
+        public long SpawnCount { get; set; }
     }
 }

@@ -12,6 +12,8 @@ namespace Models.Discord.Common
         RandomQuote,
         RandomJoke,
         RandomParagraph,
-        Discord
+        Discord,
+        RandomUselessFact,
+        RandomActivity
     }
 }

@@ -67,7 +67,7 @@ namespace DiscordPokemonNameBot.Service
                         {
                             pokemonType |= (int)PokemonType.Shadow;
                         }
-                        if (pokemonName != null && (pokemonName.Contains("alolan") || pokemonName.Contains("galarian")))
+                        if (pokemonName != null && (pokemonName.Contains("alolan") || pokemonName.Contains("galarian") || pokemonName.Contains("hisuian")))
                         {
                             pokemonType |= (int)PokemonType.Regional;
                         }
@@ -104,8 +104,8 @@ namespace DiscordPokemonNameBot.Service
             if(guildId.HasValue)
             {
                 int pokemonId = prediction.PredictedPokemonLabel;
-                Pokemon pokemon = await _pokemonRepository.GetPokemonById(pokemonId);
-                if (pokemon.IsRare) //Rare Pokemon
+                Pokemon? pokemon = await _pokemonRepository.GetPokemonById(pokemonId);
+                if (pokemon != null && pokemon.IsRare) //Rare Pokemon
                 {
                     var oldValue = _message.SpamDetail[guildId.Value];
                     var newValue = new SpamDetail()

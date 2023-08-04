@@ -16,11 +16,19 @@ namespace Repository
             _logger = logger;
         }
 
-        public async Task<Pokemon> GetPokemonById(int pokemonId)
+        public async Task<Pokemon?> GetPokemonById(int pokemonId)
         {
-            FilterDefinition<Pokemon> filter = Builders<Pokemon>.Filter.Eq(r => r.PokemonId, pokemonId);
-            Pokemon result = await _collection.Find(filter).FirstOrDefaultAsync();
-            return result;
+            try
+            {
+                FilterDefinition<Pokemon> filter = Builders<Pokemon>.Filter.Eq(r => r.PokemonId, pokemonId);
+                Pokemon result = await _collection.Find(filter).FirstOrDefaultAsync();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                await _logger.ExceptionLog("PokemonRepository.GetPokemonById", ex).ConfigureAwait(false);
+            }
+            return null;
         }
 
         public async Task InsertPokemonAsync(List<Pokemon> pokemon)
@@ -40,7 +48,7 @@ namespace Repository
             }
             catch(Exception ex)
             {
-                await _logger.ExceptionLog("PokemonRepository", ex).ConfigureAwait(false);
+                await _logger.ExceptionLog("PokemonRepository.InsertPokemonAsync", ex).ConfigureAwait(false);
             }
         }
     }

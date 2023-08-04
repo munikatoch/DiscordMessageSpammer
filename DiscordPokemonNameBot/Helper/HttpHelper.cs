@@ -96,8 +96,13 @@ namespace DiscordPokemonNameBot.Helper
                     {
                         string data = await response.Content.ReadAsStringAsync();
 
+                        string contentType = string.Empty;
 
-                        if (TypeUtil.IsJson(data))
+                        if (response.Content.Headers.ContentType != null)
+                        {
+                            contentType = response.Content.Headers.ContentType.ToString();
+                        }
+                        if (contentType.Equals("application/json"))
                         {
                             result = JsonSerializer.Deserialize<T>(data, new JsonSerializerOptions()
                             {

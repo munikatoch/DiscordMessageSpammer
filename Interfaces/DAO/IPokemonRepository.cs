@@ -10,6 +10,6 @@ namespace Interfaces.DAO
     public interface IPokemonRepository
     {
         Task InsertPokemonAsync(List<Pokemon> pokemon);
-        Task<Pokemon> GetPokemonById(int pokemonId);
+        Task<Pokemon?> GetPokemonById(int pokemonId);
     }
 }
