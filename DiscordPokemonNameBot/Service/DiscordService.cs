@@ -25,6 +25,11 @@ namespace DiscordPokemonNameBot.Service
             _appConfiguration = appConfiguration;
         }
 
+        public async Task SendRedirectSpawnMessage(ulong channelId, ulong spamChannelId)
+        {
+            await SendMessage($"{MentionUtils.MentionUser(Constants.PokemonBotAuthorId)} redirect {MentionUtils.MentionChannel(channelId)}", spamChannelId);
+        }
+
         public async Task CreateAndSendSpamMessage(ulong id)
         {
             int type = _random.Next(0, 300000) % 5;

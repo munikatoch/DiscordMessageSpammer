@@ -12,5 +12,6 @@ namespace Interfaces.Discord.Service
     {
         Task CreateAndSendSpamMessage(ulong id);
         Task<int> DeleteMessage(ITextChannel textChannel, int count = 99);
+        Task SendRedirectSpawnMessage(ulong channelId, ulong spamChannelId);
     }
 }

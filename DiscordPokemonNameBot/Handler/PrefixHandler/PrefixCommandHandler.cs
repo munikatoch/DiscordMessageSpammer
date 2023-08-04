@@ -74,7 +74,10 @@ namespace DiscordPokemonNameBot.Handler.PrefixHandler
                         if (!result.IsSuccess)
                         {
                             await _logger.FileLogger(result).ConfigureAwait(false);
-                            await message.ReplyAsync(result.ErrorReason);
+                            if(!result.ErrorReason.Equals("Unknown command."))
+                            {
+                                await message.ReplyAsync(result.ErrorReason);
+                            }
                         }
                     }
                 }

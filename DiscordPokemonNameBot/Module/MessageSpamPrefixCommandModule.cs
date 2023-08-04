@@ -2,10 +2,13 @@
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Google.Protobuf.WellKnownTypes;
 using Interfaces.Discord.Service;
 using Interfaces.Logger;
 using Models;
 using Models.Discord.Common;
+using System.Text;
+using System.Threading.Channels;
 
 namespace DiscordPokemonNameBot.Module
 {
@@ -102,19 +105,10 @@ namespace DiscordPokemonNameBot.Module
                 {
                     DiscordChannelId = channel.Id,
                     DurationInSeconds = TimeSpan.FromSeconds(duration),
-                    IsSpamMessageEnabled = false
+                    IsSpamMessageEnabled = false,
+                    CurrentIndex = 0,
+                    PokemonSpawnChannel = new List<ulong>(),
                 });
-            }
-            else
-            {
-                var oldValue = _message.SpamDetail[Context.Guild.Id];
-                var newValue = new SpamDetail()
-                {
-                    DiscordChannelId = channel.Id,
-                    DurationInSeconds = TimeSpan.FromSeconds(duration),
-                    IsSpamMessageEnabled = oldValue.IsSpamMessageEnabled
-                };
-                _message.SpamDetail.TryUpdate(Context.Guild.Id, newValue, oldValue);
             }
             if (!_message.SpamDetail[Context.Guild.Id].IsSpamMessageEnabled)
             {
@@ -124,7 +118,9 @@ namespace DiscordPokemonNameBot.Module
                 {
                     DiscordChannelId = channel.Id,
                     DurationInSeconds = TimeSpan.FromSeconds(duration),
-                    IsSpamMessageEnabled = true
+                    IsSpamMessageEnabled = true,
+                    CurrentIndex = 0,
+                    PokemonSpawnChannel = oldValue.PokemonSpawnChannel
                 };
                 _message.SpamDetail.TryUpdate(Context.Guild.Id, newValue, oldValue);
                 _ = Task.Run(async () =>
@@ -142,15 +138,59 @@ namespace DiscordPokemonNameBot.Module
             }
         }
 
+        [Command("setchannel")]
+        public async Task SetPokemonSpanChannels(params string[] channels)
+        {
+            List<ulong> channelIds = new List<ulong>();
+
+            foreach (string tempChannel in channels)
+            {
+                string channel = tempChannel.Trim().TrimEnd(',');
+                MentionUtils.TryParseChannel(channel, out ulong channelId);
+                channelIds.Add(channelId);
+            }
+
+            await Context.Message.ReplyAsync("Pokemon spawn channels set");
+
+            SpamDetail oldValue = _message.SpamDetail[Context.Guild.Id];
+
+            _message.SpamDetail.TryUpdate(Context.Guild.Id, new SpamDetail()
+            {
+                DurationInSeconds = oldValue.DurationInSeconds,
+                IsSpamMessageEnabled = oldValue.IsSpamMessageEnabled,
+                PokemonSpawnChannel = channelIds,
+                CurrentIndex = oldValue.CurrentIndex,
+            }, oldValue);
+        }
+
+        [Command("getchannel")]
+        public async Task GetPokemonSpanChannels()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            SpamDetail oldValue = _message.SpamDetail[Context.Guild.Id];
+
+            if(oldValue.PokemonSpawnChannel.Count > 0)
+            {
+                foreach (var channel in oldValue.PokemonSpawnChannel)
+                {
+                    sb.Append($"{MentionUtils.MentionChannel(channel)} ");
+                }
+            }
+            await Context.Message.ReplyAsync("Pokemon spawn channels:" + sb.ToString());
+        }
+
         [Command("stopspam")]
         public async Task StopMessageSpam()
         {
             var oldValue = _message.SpamDetail[Context.Guild.Id];
             var newValue = new SpamDetail()
             {
-                DiscordChannelId = oldValue.DiscordChannelId,
+                PokemonSpawnChannel = oldValue.PokemonSpawnChannel,
                 DurationInSeconds = oldValue.DurationInSeconds,
-                IsSpamMessageEnabled = false
+                IsSpamMessageEnabled = false,
+                CurrentIndex = oldValue.CurrentIndex,
+                DiscordChannelId = oldValue.DiscordChannelId,
             };
             _message.SpamDetail.TryUpdate(Context.Guild.Id, newValue, oldValue);
             await Context.Message.ReplyAsync("Message spam stopped");
@@ -192,7 +232,7 @@ namespace DiscordPokemonNameBot.Module
                     FileUtils.CreateZipFileSafely();
                     await Context.Channel.SendFileAsync(Constants.LogZipfile);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     await _logger.DiscrodChannelLogger(e.Message, Constants.GuildId, Constants.BotLogsChannel);
                 }
