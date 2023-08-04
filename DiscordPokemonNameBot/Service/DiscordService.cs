@@ -61,14 +61,14 @@ namespace DiscordPokemonNameBot.Service
                     RandomUselessFactResponse? randomUselessFact = await _httpHelper.GetRequest<RandomUselessFactResponse>(Constants.RandomUselessFactUrl, HttpClientType.RandomUselessFact.ToString());
                     if (!string.IsNullOrEmpty(randomUselessFact?.Text))
                     {
-                        _message.Message = $"Random Useless Fact\n{randomUselessFact.Text}";
+                        _message.Message = $"**Random Useless Fact**\n{randomUselessFact.Text}";
                     }
                     break;
                 case 4:
                     RandomActivityResponse? randomActivity = await _httpHelper.GetRequest<RandomActivityResponse>(Constants.RandomActivityUrl, HttpClientType.RandomActivity.ToString());
                     if (!string.IsNullOrEmpty(randomActivity?.Activity))
                     {
-                        _message.Message = $"Random activity to do\n{randomActivity.Activity}";
+                        _message.Message = $"**Random activity to do**\n{randomActivity.Activity}";
                     }
                     break;
             }
