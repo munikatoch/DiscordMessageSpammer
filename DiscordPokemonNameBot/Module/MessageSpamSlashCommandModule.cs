@@ -29,6 +29,7 @@ namespace DiscordPokemonNameBot.Module
 
         [SlashCommand("version", "Current Bot version")]
         [RequireBotPermission(ChannelPermission.SendMessages)]
+        [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task BotVersionn()
         {
             await RespondAsync("Bot version: " + Constants.BotVersion);
@@ -45,6 +46,7 @@ namespace DiscordPokemonNameBot.Module
 
         [SlashCommand("delete", "Delete specified number of messages")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
+        [RequireUserPermission(GuildPermission.ManageMessages)]
         public async Task DeleteMessages([Summary(description: "Downloads and removes n messages from the current channel with max 99.")] int count)
         {
             _logger.CommandUsedLog("MessageSpamSlashCommandModule", "delete", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
@@ -78,6 +80,7 @@ namespace DiscordPokemonNameBot.Module
 
         [SlashCommand("startspam", "Start Message Spamming")]
         [RequireBotPermission(ChannelPermission.SendMessages)]
+        [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task StartMessageSpam(
             [Summary(description: "Channel for message spamming")] SocketChannel channel,
             [Summary(description: "Duration in seconds after which message should spam minimum is 3s")] int duration = 0
@@ -140,6 +143,7 @@ namespace DiscordPokemonNameBot.Module
         }
 
         [SlashCommand("setchannel", "Set pokemon redirect channels")]
+        [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task SetPokemonSpanChannels(string spawnChannels)
         {
             List<ulong> channelIds = new List<ulong>();
@@ -166,6 +170,7 @@ namespace DiscordPokemonNameBot.Module
         }
 
         [SlashCommand("getchannel", "Set pokemon redirect channels")]
+        [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task GetPokemonSpanChannels()
         {
             StringBuilder sb = new StringBuilder();
@@ -183,6 +188,7 @@ namespace DiscordPokemonNameBot.Module
         }
 
         [SlashCommand("stopspam", "Stop Message Spamming")]
+        [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task StopMessageSpam()
         {
             var oldValue = _message.SpamDetail[Context.Guild.Id];
@@ -201,6 +207,7 @@ namespace DiscordPokemonNameBot.Module
 
         [SlashCommand("deleteall", "Delete all messages from the channel")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
+        [RequireUserPermission(GuildPermission.ManageMessages)]
         public async Task DeleteAllMessagesFromChannel()
         {
             _logger.CommandUsedLog("MessageSpamSlashCommandModule", "deleteall", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
@@ -221,6 +228,7 @@ namespace DiscordPokemonNameBot.Module
 
         [SlashCommand("getlogs", "Get log files created")]
         [RequireBotPermission(ChannelPermission.AttachFiles)]
+        [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task GetDiscordBotLogs()
         {
             _logger.CommandUsedLog("MessageSpamSlashCommandModule", "getlogs", Context.Channel.Id, Context.User.Id, Context.Guild.Id);

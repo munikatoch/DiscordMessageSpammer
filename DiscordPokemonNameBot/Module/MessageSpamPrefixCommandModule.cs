@@ -31,6 +31,7 @@ namespace DiscordPokemonNameBot.Module
 
         [Command("version")]
         [RequireBotPermission(ChannelPermission.SendMessages)]
+        [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task BotVersionn()
         {
             await Context.Message.ReplyAsync("Bot version: " + Constants.BotVersion);
@@ -47,6 +48,7 @@ namespace DiscordPokemonNameBot.Module
 
         [Command("delete")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
+        [RequireUserPermission(GuildPermission.ManageMessages)]
         public async Task DeleteMessages(int count)
         {
             _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "delete", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
@@ -80,6 +82,7 @@ namespace DiscordPokemonNameBot.Module
 
         [Command("startspam")]
         [RequireBotPermission(ChannelPermission.SendMessages)]
+        [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task StartMessageSpam(SocketChannel channel, int duration = 0)
         {
             _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "startspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
@@ -139,6 +142,7 @@ namespace DiscordPokemonNameBot.Module
         }
 
         [Command("setchannel")]
+        [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task SetPokemonSpanChannels(params string[] channels)
         {
             List<ulong> channelIds = new List<ulong>();
@@ -164,6 +168,7 @@ namespace DiscordPokemonNameBot.Module
         }
 
         [Command("getchannel")]
+        [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task GetPokemonSpanChannels()
         {
             StringBuilder sb = new StringBuilder();
@@ -181,6 +186,7 @@ namespace DiscordPokemonNameBot.Module
         }
 
         [Command("stopspam")]
+        [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task StopMessageSpam()
         {
             var oldValue = _message.SpamDetail[Context.Guild.Id];
@@ -199,6 +205,7 @@ namespace DiscordPokemonNameBot.Module
 
         [Command("deleteall")]
         [RequireBotPermission(ChannelPermission.ManageMessages)]
+        [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task DeleteAllMessagesFromChannel()
         {
             _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "deleteall", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
@@ -219,6 +226,7 @@ namespace DiscordPokemonNameBot.Module
 
         [Command("getlogs")]
         [RequireBotPermission(ChannelPermission.AttachFiles)]
+        [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task GetDiscordBotLogs()
         {
             _logger.CommandUsedLog("MessageSpamPrefixCommandModule", "getlogs", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
