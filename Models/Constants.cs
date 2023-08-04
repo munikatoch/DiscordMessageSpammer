@@ -3,7 +3,7 @@
     public class Constants
     {
         #region Bot Version
-        public static readonly string BotVersion = "1.7";
+        public static readonly string BotVersion = "1.9";
         #endregion
 
 

@@ -160,6 +160,7 @@ namespace DiscordPokemonNameBot.Module
                 IsSpamMessageEnabled = oldValue.IsSpamMessageEnabled,
                 PokemonSpawnChannel = channelIds,
                 CurrentIndex = oldValue.CurrentIndex,
+                DiscordChannelId = oldValue.DiscordChannelId,
             }, oldValue);
         }
 
