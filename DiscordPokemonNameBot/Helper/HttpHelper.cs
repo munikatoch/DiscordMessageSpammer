@@ -51,7 +51,7 @@ namespace DiscordPokemonNameBot.Helper
                 }
                 catch (Exception ex)
                 {
-                    await _appLogger.ExceptionLog("HttpHelper: GetImageContent", ex).ConfigureAwait(false);
+                    await _appLogger.ExceptionLog($"HttpHelper: GetImageContent {url}", ex).ConfigureAwait(false);
                 }
             }
             return content;
@@ -78,7 +78,7 @@ namespace DiscordPokemonNameBot.Helper
                 }
                 catch (Exception ex)
                 {
-                    await _appLogger.ExceptionLog("HttpHelper: FormUrlEcodedContentPostRequest", ex).ConfigureAwait(false);
+                    await _appLogger.ExceptionLog($"HttpHelper: FormUrlEcodedContentPostRequest {url}", ex).ConfigureAwait(false);
                 }
             }
         }
@@ -122,7 +122,7 @@ namespace DiscordPokemonNameBot.Helper
                 }
                 catch (Exception ex)
                 {
-                    await _appLogger.ExceptionLog("HttpHelper: GetRequest", ex).ConfigureAwait(false);
+                    await _appLogger.ExceptionLog($"HttpHelper: GetRequest {url}", ex).ConfigureAwait(false);
                 }
             }
             return default;

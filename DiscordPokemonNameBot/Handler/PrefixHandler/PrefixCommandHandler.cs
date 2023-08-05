@@ -51,36 +51,43 @@ namespace DiscordPokemonNameBot.Handler.PrefixHandler
 
         private async Task HandleCommandAsync(SocketUserMessage message)
         {
-            if (message != null)
+            try
             {
-                if (message.Author.IsBot)
+                if (message != null)
                 {
-                    if (_prefixService.ValidatePokemonSpanMessage(message, out Embed? embed) && embed != null && embed.Image.HasValue)
+                    if (message.Author.IsBot)
                     {
-                        if (message.Channel is SocketGuildChannel)
+                        if (_prefixService.ValidatePokemonSpanMessage(message, out Embed? embed) && embed != null && embed.Image.HasValue)
                         {
-                            SocketGuildChannel? channel = message.Channel as SocketGuildChannel;
-                            await _pokemonService.PredictPokemon(embed.Image.Value.Url, channel?.Guild.Id);
+                            if (message.Channel is SocketGuildChannel)
+                            {
+                                SocketGuildChannel? channel = message.Channel as SocketGuildChannel;
+                                await _pokemonService.PredictPokemon(embed.Image.Value.Url, channel?.Guild.Id);
+                            }
                         }
                     }
-                }
-                else
-                {
-                    int argPos = 0;
-                    if (message.HasMentionPrefix(_client.CurrentUser, ref argPos))
+                    else
                     {
-                        ShardedCommandContext context = new ShardedCommandContext(_client, message);
-                        IResult result = await _commandService.ExecuteAsync(context, argPos, _serviceProvider);
-                        if (!result.IsSuccess)
+                        int argPos = 0;
+                        if (message.HasMentionPrefix(_client.CurrentUser, ref argPos))
                         {
-                            await _logger.FileLogger(result).ConfigureAwait(false);
-                            if(!result.ErrorReason.Equals("Unknown command."))
+                            ShardedCommandContext context = new ShardedCommandContext(_client, message);
+                            IResult result = await _commandService.ExecuteAsync(context, argPos, _serviceProvider);
+                            if (!result.IsSuccess)
                             {
-                                await message.ReplyAsync(result.ErrorReason);
+                                await _logger.FileLogger(result).ConfigureAwait(false);
+                                if (!result.ErrorReason.Equals("Unknown command."))
+                                {
+                                    await message.ReplyAsync(result.ErrorReason);
+                                }
                             }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                await _logger.ExceptionLog("PrefixCommandHandler.HandleCommandAsync", ex).ConfigureAwait(false);
             }
         }
 

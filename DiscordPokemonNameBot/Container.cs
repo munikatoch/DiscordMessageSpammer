@@ -29,6 +29,8 @@ using Serilog.Exceptions;
 using Interfaces.DAO;
 using Repository;
 using MongoDB.Driver;
+using Polly;
+using Polly.Extensions.Http;
 
 namespace DiscordPokemonNameBot
 {
@@ -164,31 +166,37 @@ namespace DiscordPokemonNameBot
             collection.AddHttpClient(HttpClientType.RandomParagraph.ToString(), x =>
             {
                 x.Timeout = TimeSpan.FromSeconds(3);
-            });
+            }).AddPolicyHandler(GetRetryPolicy());
+
             collection.AddHttpClient(HttpClientType.RandomJoke.ToString(), x =>
             {
                 x.Timeout = TimeSpan.FromSeconds(3);
-            });
+            }).AddPolicyHandler(GetRetryPolicy());
+
             collection.AddHttpClient(HttpClientType.RandomQuote.ToString(), x =>
             {
                 x.Timeout = TimeSpan.FromSeconds(3);
-            });
+            }).AddPolicyHandler(GetRetryPolicy());
+
             collection.AddHttpClient(HttpClientType.Pokemon.ToString(), x =>
             {
                 x.Timeout = TimeSpan.FromSeconds(3);
-            });
+            }).AddPolicyHandler(GetRetryPolicy());
+
             collection.AddHttpClient(HttpClientType.Discord.ToString(), x =>
             {
                 x.Timeout = TimeSpan.FromSeconds(3);
-            });
+            }).AddPolicyHandler(GetRetryPolicy());
+
             collection.AddHttpClient(HttpClientType.RandomUselessFact.ToString(), x =>
             {
                 x.Timeout = TimeSpan.FromSeconds(3);
-            });
+            }).AddPolicyHandler(GetRetryPolicy());
+
             collection.AddHttpClient(HttpClientType.RandomActivity.ToString(), x =>
             {
                 x.Timeout = TimeSpan.FromSeconds(3);
-            });
+            }).AddPolicyHandler(GetRetryPolicy());
 
             #endregion
 
@@ -209,6 +217,13 @@ namespace DiscordPokemonNameBot
             collection.AddSingleton<ILogger>(logger);
             collection.AddScoped<IAppLogger, AppLogger>();
             return collection.BuildServiceProvider();
+        }
+
+        private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
+        {
+            return HttpPolicyExtensions.HandleTransientHttpError()
+                .OrResult(msg => !msg.IsSuccessStatusCode)
+                .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(3 * retryAttempt));
         }
     }
 }
