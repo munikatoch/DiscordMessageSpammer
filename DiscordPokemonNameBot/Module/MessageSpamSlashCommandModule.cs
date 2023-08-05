@@ -16,15 +16,13 @@ namespace DiscordPokemonNameBot.Module
         private readonly IAppLogger _logger;
         private readonly MessageSpam _message;
         private readonly IDiscordService _discordService;
-        private readonly IPokemonService _pokemonService;
 
-        public MessageSpamSlashCommandModule(Random random, IAppLogger appLogger, MessageSpam message, IDiscordService discordService, IPokemonService pokemonService)
+        public MessageSpamSlashCommandModule(Random random, IAppLogger appLogger, MessageSpam message, IDiscordService discordService)
         {
             _random = random;
             _logger = appLogger;
             _message = message;
             _discordService = discordService;
-            _pokemonService = pokemonService;
         }
 
         [SlashCommand("version", "Current Bot version")]
@@ -95,17 +93,17 @@ namespace DiscordPokemonNameBot.Module
             }
             else if (duration == 0)
             {
-                duration = _random.Next(3, 15);
+                duration = _random.Next(4, 15);
                 await RespondAsync($"Message will spam at {duration}s per message in channel <#{channel.Id}> as duration was default or 0");
             }
-            else if (duration < 3)
+            else if (duration < 4)
             {
-                await RespondAsync($"Message will spam at 3s per message as this is the minimum in channel <#{channel.Id}>");
-                duration = 3;
+                await RespondAsync($"Message will spam at 4s per message as this is the minimum in channel <#{channel.Id}>");
+                duration = 4;
             }
             if (!_message.SpamDetail.ContainsKey(Context.Guild.Id))
             {
-                InitializeSpamMessage(Context.Guild.Id, channel.Id, duration);
+                InitializeSpamMessage(channel.Id, duration);
             }
             if (!_message.SpamDetail[Context.Guild.Id].IsSpamMessageEnabled)
             {
@@ -116,7 +114,6 @@ namespace DiscordPokemonNameBot.Module
                     DiscordChannelId = channel.Id,
                     DurationInSeconds = TimeSpan.FromSeconds(duration),
                     IsSpamMessageEnabled = true,
-                    CurrentIndex = 0,
                     PokemonSpawnChannel = oldValue.PokemonSpawnChannel
                 };
                 _message.SpamDetail.TryUpdate(Context.Guild.Id, newValue, oldValue);
@@ -149,10 +146,12 @@ namespace DiscordPokemonNameBot.Module
                 MentionUtils.TryParseChannel(channel, out ulong channelId);
                 channelIds.Add(channelId);
             }
+
+            _logger.CommandUsedLog("MessageSpamSlashCommandModule", "setchannel", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
             await RespondAsync("Pokemon spawn channels set");
 
             if (!_message.SpamDetail.ContainsKey(Context.Guild.Id))
-                InitializeSpamMessage(Context.Guild.Id, 0, 0);
+                InitializeSpamMessage(0, 0);
 
             SpamDetail oldValue = _message.SpamDetail[Context.Guild.Id];
 
@@ -161,7 +160,6 @@ namespace DiscordPokemonNameBot.Module
                 DurationInSeconds = oldValue.DurationInSeconds,
                 IsSpamMessageEnabled = oldValue.IsSpamMessageEnabled,
                 PokemonSpawnChannel = channelIds,
-                CurrentIndex = oldValue.CurrentIndex,
                 DiscordChannelId = oldValue.DiscordChannelId,
             }, oldValue);
         }
@@ -186,8 +184,9 @@ namespace DiscordPokemonNameBot.Module
             }
             else
             {
-                sb.Append("No Channel Found!");
+                sb.Append("No channel(s) added!");
             }
+            _logger.CommandUsedLog("MessageSpamSlashCommandModule", "getchannel", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
             await RespondAsync("Pokemon spawn channels:" + sb.ToString());
         }
 
@@ -195,17 +194,23 @@ namespace DiscordPokemonNameBot.Module
         [RequireUserPermission(GuildPermission.ModerateMembers)]
         public async Task StopMessageSpam()
         {
-            var oldValue = _message.SpamDetail[Context.Guild.Id];
-            var newValue = new SpamDetail()
+            if (_message.SpamDetail.ContainsKey(Context.Guild.Id) && _message.SpamDetail[Context.Guild.Id].IsSpamMessageEnabled)
             {
-                DiscordChannelId = oldValue.DiscordChannelId,
-                DurationInSeconds = oldValue.DurationInSeconds,
-                IsSpamMessageEnabled = false,
-                CurrentIndex = oldValue.CurrentIndex,
-                PokemonSpawnChannel = oldValue.PokemonSpawnChannel,
-            };
-            _message.SpamDetail.TryUpdate(Context.Guild.Id, newValue, oldValue);
-            await RespondAsync("Message spam stopped");
+                var oldValue = _message.SpamDetail[Context.Guild.Id];
+                var newValue = new SpamDetail()
+                {
+                    PokemonSpawnChannel = oldValue.PokemonSpawnChannel,
+                    DurationInSeconds = oldValue.DurationInSeconds,
+                    IsSpamMessageEnabled = false,
+                    DiscordChannelId = oldValue.DiscordChannelId,
+                };
+                _message.SpamDetail.TryUpdate(Context.Guild.Id, newValue, oldValue);
+                await RespondAsync("Message spam stopped");
+            }
+            else
+            {
+                await RespondAsync("Start message spam first you genius");
+            }
             _logger.CommandUsedLog("MessageSpamSlashCommandModule", "stopspam", Context.Channel.Id, Context.User.Id, Context.Guild.Id);
         }
 
@@ -258,14 +263,13 @@ namespace DiscordPokemonNameBot.Module
             }).ConfigureAwait(false);
         }
 
-        private void InitializeSpamMessage(ulong id, ulong channelId, int duration)
+        private void InitializeSpamMessage(ulong channelId, int duration)
         {
             _message.SpamDetail.TryAdd(Context.Guild.Id, new SpamDetail()
             {
                 DiscordChannelId = channelId,
                 DurationInSeconds = TimeSpan.FromSeconds(duration),
                 IsSpamMessageEnabled = false,
-                CurrentIndex = 0,
                 PokemonSpawnChannel = new List<ulong>(),
             });
         }

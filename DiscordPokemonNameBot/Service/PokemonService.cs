@@ -28,7 +28,7 @@ namespace DiscordPokemonNameBot.Service
             _discordService = discordService;
         }
 
-        public async Task PredictPokemon(string url, ulong? guildId)
+        public async Task PredictPokemon(string url, ulong? guildId, ulong channelId)
         {
             byte[]? imageContent = await _httpHelper.GetImageContent(url, HttpClientType.Pokemon.ToString());
             if (imageContent != null && imageContent.Length > 0)
@@ -39,7 +39,7 @@ namespace DiscordPokemonNameBot.Service
                     Image = imageContent
                 };
                 ModelOutput prediction = predictionEngine.Predict(imageToPredict);
-                await BuildPokemonPredictionModel(prediction, guildId);
+                await BuildPokemonPredictionModel(prediction, guildId, channelId);
             }
         }
 
@@ -101,7 +101,7 @@ namespace DiscordPokemonNameBot.Service
             await _pokemonRepository.InsertPokemonAsync(pokemons);
         }
 
-        private async Task BuildPokemonPredictionModel(ModelOutput prediction, ulong? guildId)
+        private async Task BuildPokemonPredictionModel(ModelOutput prediction, ulong? guildId, ulong channelId)
         {
             if(guildId.HasValue)
             {
@@ -114,17 +114,16 @@ namespace DiscordPokemonNameBot.Service
 
                     if(oldValue.PokemonSpawnChannel.Count > 0)
                     {
-                        int currentIndex = (oldValue.CurrentIndex + 1) % oldValue.PokemonSpawnChannel.Count;
-                        await _discordService.SendRedirectSpawnMessage(oldValue.PokemonSpawnChannel[currentIndex], oldValue.DiscordChannelId);
-                        var newValue = new SpamDetail()
+                        var channelIndex = oldValue.PokemonSpawnChannel.FindIndex(x => x == channelId);
+                        if (channelIndex == -1)
                         {
-                            DiscordChannelId = oldValue.DiscordChannelId,
-                            DurationInSeconds = oldValue.DurationInSeconds,
-                            IsSpamMessageEnabled = true,
-                            CurrentIndex = currentIndex,
-                            PokemonSpawnChannel = oldValue.PokemonSpawnChannel
-                        };
-                        _message.SpamDetail.TryUpdate(guildId.Value, newValue, oldValue);
+                            await _discordService.SendRedirectSpawnMessage(oldValue.PokemonSpawnChannel[0], oldValue.DiscordChannelId);
+                        }
+                        else 
+                        {
+                            channelIndex = (channelIndex + 1) % oldValue.PokemonSpawnChannel.Count;
+                            await _discordService.SendRedirectSpawnMessage(oldValue.PokemonSpawnChannel[channelIndex], oldValue.DiscordChannelId);
+                        }
                     }
                     else
                     {
@@ -133,7 +132,6 @@ namespace DiscordPokemonNameBot.Service
                             DiscordChannelId = oldValue.DiscordChannelId,
                             DurationInSeconds = oldValue.DurationInSeconds,
                             IsSpamMessageEnabled = false,
-                            CurrentIndex = oldValue.CurrentIndex,
                             PokemonSpawnChannel = oldValue.PokemonSpawnChannel
                         };
                         _message.SpamDetail.TryUpdate(guildId.Value, newValue, oldValue);

@@ -5,7 +5,7 @@ namespace Interfaces.Discord.Service
 {
     public interface IPokemonService
     {
-        Task PredictPokemon(string url, ulong? guildId);
+        Task PredictPokemon(string url, ulong? guildId, ulong channelId);
 
         Task InsertPokemons();
     }

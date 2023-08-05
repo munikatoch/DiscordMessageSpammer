@@ -62,7 +62,7 @@ namespace DiscordPokemonNameBot.Handler.PrefixHandler
                             if (message.Channel is SocketGuildChannel)
                             {
                                 SocketGuildChannel? channel = message.Channel as SocketGuildChannel;
-                                await _pokemonService.PredictPokemon(embed.Image.Value.Url, channel?.Guild.Id);
+                                await _pokemonService.PredictPokemon(embed.Image.Value.Url, channel?.Guild.Id, message.Channel.Id);
                             }
                         }
                     }

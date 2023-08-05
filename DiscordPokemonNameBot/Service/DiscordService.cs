@@ -131,11 +131,14 @@ namespace DiscordPokemonNameBot.Service
 
             var totalUsers = _appConfiguration.GetValue($"DiscordUser", 0);
 
-            var authToken = _random.Next(0, 300000) % totalUsers;
+            if(totalUsers > 0)
+            {
+                var authToken = _random.Next(0, 300000) % totalUsers;
 
-            string userToken = _appConfiguration.GetValue($"DiscordUserAuthToken{authToken}", string.Empty);
+                string userToken = _appConfiguration.GetValue($"DiscordUserAuthToken{authToken}", string.Empty);
 
-            headers.Add("authorization", userToken);
+                headers.Add("authorization", userToken);
+            }
             return headers;
         }
     }
